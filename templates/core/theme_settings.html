@@ -1,0 +1,360 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Theme Settings - NeuralFlow{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Theme Settings</h1>
+            <p>Customize your NeuralFlow experience with different themes and preferences</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="container">
+        <div class="theme-container">
+            <div class="theme-section">
+                <h3>Color Themes</h3>
+                <div class="theme-grid">
+                    <div class="theme-card active" onclick="setTheme('default')">
+                        <div class="theme-preview default-theme">
+                            <div class="theme-bar"></div>
+                            <div class="theme-content"></div>
+                        </div>
+                        <h4>Default Blue</h4>
+                        <p>Classic blue gradient theme</p>
+                    </div>
+                    
+                    <div class="theme-card" onclick="setTheme('purple')">
+                        <div class="theme-preview purple-theme">
+                            <div class="theme-bar"></div>
+                            <div class="theme-content"></div>
+                        </div>
+                        <h4>Purple Galaxy</h4>
+                        <p>Deep purple and violet tones</p>
+                    </div>
+                    
+                    <div class="theme-card" onclick="setTheme('green')">
+                        <div class="theme-preview green-theme">
+                            <div class="theme-bar"></div>
+                            <div class="theme-content"></div>
+                        </div>
+                        <h4>Matrix Green</h4>
+                        <p>Cyberpunk green aesthetic</p>
+                    </div>
+                    
+                    <div class="theme-card" onclick="setTheme('orange')">
+                        <div class="theme-preview orange-theme">
+                            <div class="theme-bar"></div>
+                            <div class="theme-content"></div>
+                        </div>
+                        <h4>Sunset Orange</h4>
+                        <p>Warm orange and red gradients</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="theme-section">
+                <h3>Display Preferences</h3>
+                <div class="preferences-grid">
+                    <div class="preference-item">
+                        <label>
+                            <input type="checkbox" id="animations" checked onchange="toggleAnimations()">
+                            <span class="checkmark"></span>
+                            Enable Animations
+                        </label>
+                    </div>
+                    
+                    <div class="preference-item">
+                        <label>
+                            <input type="checkbox" id="particles" checked onchange="toggleParticles()">
+                            <span class="checkmark"></span>
+                            Floating Shapes
+                        </label>
+                    </div>
+                    
+                    <div class="preference-item">
+                        <label>
+                            <input type="checkbox" id="blur" checked onchange="toggleBlur()">
+                            <span class="checkmark"></span>
+                            Background Blur
+                        </label>
+                    </div>
+                    
+                    <div class="preference-item">
+                        <label>
+                            <input type="checkbox" id="sounds" onchange="toggleSounds()">
+                            <span class="checkmark"></span>
+                            UI Sounds
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="theme-section">
+                <h3>Font Settings</h3>
+                <div class="font-settings">
+                    <div class="setting-group">
+                        <label>Font Size</label>
+                        <input type="range" id="fontSize" min="12" max="20" value="16" oninput="updateFontSize(this.value)">
+                        <span id="fontSizeValue">16px</span>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>Font Family</label>
+                        <select id="fontFamily" onchange="updateFontFamily(this.value)">
+                            <option value="Montserrat">Montserrat (Default)</option>
+                            <option value="Inter">Inter</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Poppins">Poppins</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="theme-actions">
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+                <button class="btn btn-secondary" onclick="resetSettings()">Reset to Default</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setTheme(theme) {
+    // Update active theme card
+    document.querySelectorAll('.theme-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    event.target.closest('.theme-card').classList.add('active');
+    
+    // Apply theme (in a real app, this would update CSS variables)
+    localStorage.setItem('selectedTheme', theme);
+    console.log(`${theme} theme selected`);
+}
+
+function toggleAnimations() {
+    const enabled = document.getElementById('animations').checked;
+    localStorage.setItem('animationsEnabled', enabled);
+    console.log('Animations:', enabled ? 'enabled' : 'disabled');
+}
+
+function toggleParticles() {
+    const enabled = document.getElementById('particles').checked;
+    const shapes = document.querySelector('.floating-shapes');
+    if (shapes) {
+        shapes.style.display = enabled ? 'block' : 'none';
+    }
+    localStorage.setItem('particlesEnabled', enabled);
+}
+
+function toggleBlur() {
+    const enabled = document.getElementById('blur').checked;
+    localStorage.setItem('blurEnabled', enabled);
+    console.log('Background blur:', enabled ? 'enabled' : 'disabled');
+}
+
+function toggleSounds() {
+    const enabled = document.getElementById('sounds').checked;
+    localStorage.setItem('soundsEnabled', enabled);
+    console.log('UI sounds:', enabled ? 'enabled' : 'disabled');
+}
+
+function updateFontSize(size) {
+    document.getElementById('fontSizeValue').textContent = size + 'px';
+    document.documentElement.style.fontSize = size + 'px';
+    localStorage.setItem('fontSize', size);
+}
+
+function updateFontFamily(family) {
+    document.body.style.fontFamily = family + ', sans-serif';
+    localStorage.setItem('fontFamily', family);
+}
+
+function saveSettings() {
+    const saveBtn = event.target;
+    saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved';
+    setTimeout(() => {
+        saveBtn.innerHTML = 'Save Settings';
+    }, 2000);
+}
+
+function resetSettings() {
+    // Reset all settings to default
+    document.getElementById('animations').checked = true;
+    document.getElementById('particles').checked = true;
+    document.getElementById('blur').checked = true;
+    document.getElementById('sounds').checked = false;
+    document.getElementById('fontSize').value = 16;
+    document.getElementById('fontSizeValue').textContent = '16px';
+    document.getElementById('fontFamily').value = 'Montserrat';
+    
+    // Reset theme
+    document.querySelectorAll('.theme-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    document.querySelector('.theme-card').classList.add('active');
+    
+    const resetBtn = event.target;
+    resetBtn.innerHTML = '<i class="fas fa-check"></i> Reset';
+    setTimeout(() => {
+        resetBtn.innerHTML = 'Reset to Default';
+    }, 2000);
+}
+
+// Load saved settings on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+    const savedFontSize = localStorage.getItem('fontSize') || '16';
+    const savedFontFamily = localStorage.getItem('fontFamily') || 'Montserrat';
+    
+    document.getElementById('fontSize').value = savedFontSize;
+    document.getElementById('fontSizeValue').textContent = savedFontSize + 'px';
+    document.getElementById('fontFamily').value = savedFontFamily;
+});
+</script>
+
+<style>
+.theme-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.theme-section {
+    margin-bottom: 3rem;
+}
+
+.theme-section h3 {
+    color: #e7ecf7;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+}
+
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.theme-card {
+    background: rgba(11,18,34,.8);
+    border: 2px solid rgba(91,140,255,.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.theme-card.active {
+    border-color: #5b8cff;
+    box-shadow: 0 0 20px rgba(91,140,255,.3);
+}
+
+.theme-card:hover {
+    transform: translateY(-3px);
+}
+
+.theme-preview {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.default-theme {
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+}
+
+.purple-theme {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.green-theme {
+    background: linear-gradient(135deg, #00d4aa, #00b894);
+}
+
+.orange-theme {
+    background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+}
+
+.theme-bar {
+    height: 20px;
+    background: rgba(255,255,255,0.2);
+    margin-bottom: 10px;
+}
+
+.theme-content {
+    height: 40px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.preference-item {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.preference-item label {
+    display: flex;
+    align-items: center;
+    color: #e7ecf7;
+    cursor: pointer;
+}
+
+.preference-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.font-settings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.setting-group {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.setting-group label {
+    display: block;
+    color: #e7ecf7;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.setting-group input,
+.setting-group select {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(11,18,34,.9);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 6px;
+    color: #e7ecf7;
+}
+
+.theme-actions {
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.theme-actions .btn {
+    margin: 0 1rem;
+}
+</style>
+{% endblock %}

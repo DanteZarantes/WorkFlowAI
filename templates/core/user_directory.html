@@ -1,0 +1,295 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Find Users - NeuralFlow{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>User Directory</h1>
+            <p>Connect with other AI enthusiasts and professionals in the NeuralFlow community</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="container">
+        <div class="search-section">
+            <div class="search-bar">
+                <input type="text" id="userSearch" placeholder="Search users by name, skills, or location..." oninput="filterUsers()">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="filter-tags">
+                <button class="filter-tag active" onclick="filterByTag('all')">All Users</button>
+                <button class="filter-tag" onclick="filterByTag('developer')">Developers</button>
+                <button class="filter-tag" onclick="filterByTag('researcher')">Researchers</button>
+                <button class="filter-tag" onclick="filterByTag('student')">Students</button>
+                <button class="filter-tag" onclick="filterByTag('entrepreneur')">Entrepreneurs</button>
+            </div>
+        </div>
+        
+        <div class="users-grid" id="usersGrid">
+            <!-- Users will be populated by JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+const users = [
+    {
+        name: "Sarah Chen",
+        role: "AI Research Scientist",
+        location: "San Francisco, CA",
+        skills: ["Machine Learning", "Computer Vision", "Python"],
+        type: "researcher",
+        avatar: "👩‍💻",
+        projects: 15,
+        connections: 234
+    },
+    {
+        name: "Marcus Rodriguez",
+        role: "Full Stack Developer",
+        location: "Austin, TX",
+        skills: ["React", "Django", "AI Integration"],
+        type: "developer",
+        avatar: "👨‍💼",
+        projects: 8,
+        connections: 156
+    },
+    {
+        name: "Emily Watson",
+        role: "AI Startup Founder",
+        location: "New York, NY",
+        skills: ["Business Strategy", "AI Ethics", "Product Management"],
+        type: "entrepreneur",
+        avatar: "👩‍🚀",
+        projects: 3,
+        connections: 89
+    },
+    {
+        name: "David Kim",
+        role: "CS Graduate Student",
+        location: "Boston, MA",
+        skills: ["Deep Learning", "NLP", "Research"],
+        type: "student",
+        avatar: "👨‍🎓",
+        projects: 12,
+        connections: 67
+    },
+    {
+        name: "Lisa Zhang",
+        role: "Data Scientist",
+        location: "Seattle, WA",
+        skills: ["Data Analysis", "ML Models", "Statistics"],
+        type: "researcher",
+        avatar: "👩‍🔬",
+        projects: 20,
+        connections: 198
+    },
+    {
+        name: "Alex Johnson",
+        role: "AI Product Manager",
+        location: "Los Angeles, CA",
+        skills: ["Product Strategy", "AI Implementation", "Team Leadership"],
+        type: "entrepreneur",
+        avatar: "👨‍💻",
+        projects: 6,
+        connections: 145
+    }
+];
+
+let currentFilter = 'all';
+
+function renderUsers(usersToRender = users) {
+    const grid = document.getElementById('usersGrid');
+    grid.innerHTML = '';
+    
+    usersToRender.forEach(user => {
+        const userCard = document.createElement('div');
+        userCard.className = 'user-card';
+        userCard.innerHTML = `
+            <div class="user-avatar">${user.avatar}</div>
+            <div class="user-info">
+                <h3>${user.name}</h3>
+                <p class="user-role">${user.role}</p>
+                <p class="user-location"><i class="fas fa-map-marker-alt"></i> ${user.location}</p>
+                <div class="user-skills">
+                    ${user.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                </div>
+                <div class="user-stats">
+                    <span><i class="fas fa-project-diagram"></i> ${user.projects} projects</span>
+                    <span><i class="fas fa-users"></i> ${user.connections} connections</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="connectUser('${user.name}')">
+                    <i class="fas fa-user-plus"></i> Connect
+                </button>
+            </div>
+        `;
+        grid.appendChild(userCard);
+    });
+}
+
+function filterUsers() {
+    const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+    let filteredUsers = users;
+    
+    if (currentFilter !== 'all') {
+        filteredUsers = users.filter(user => user.type === currentFilter);
+    }
+    
+    if (searchTerm) {
+        filteredUsers = filteredUsers.filter(user => 
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.role.toLowerCase().includes(searchTerm) ||
+            user.location.toLowerCase().includes(searchTerm) ||
+            user.skills.some(skill => skill.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    renderUsers(filteredUsers);
+}
+
+function filterByTag(type) {
+    currentFilter = type;
+    
+    // Update active tag
+    document.querySelectorAll('.filter-tag').forEach(tag => {
+        tag.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    filterUsers();
+}
+
+function connectUser(userName) {
+    event.target.innerHTML = '<i class="fas fa-check"></i> Connected';
+    event.target.disabled = true;
+    event.target.style.background = '#28a745';
+}
+
+// Initialize
+renderUsers();
+</script>
+
+<style>
+.search-section {
+    margin-bottom: 3rem;
+}
+
+.search-bar {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 15px 50px 15px 20px;
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 50px;
+    color: #e7ecf7;
+    font-size: 1rem;
+}
+
+.search-bar i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5b8cff;
+}
+
+.filter-tags {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-tag {
+    padding: 8px 16px;
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 20px;
+    color: #e7ecf7;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-tag.active,
+.filter-tag:hover {
+    background: #5b8cff;
+    color: white;
+}
+
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.user-card {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    transform: translateY(-5px);
+    border-color: #5b8cff;
+    box-shadow: 0 10px 30px rgba(91,140,255,.2);
+}
+
+.user-avatar {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.user-info h3 {
+    color: #e7ecf7;
+    margin-bottom: 0.5rem;
+}
+
+.user-role {
+    color: #5b8cff;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.user-location {
+    color: #a0a9c0;
+    margin-bottom: 1rem;
+}
+
+.user-skills {
+    margin: 1rem 0;
+}
+
+.skill-tag {
+    display: inline-block;
+    background: rgba(91,140,255,.2);
+    color: #5b8cff;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin: 2px;
+}
+
+.user-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #a0a9c0;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

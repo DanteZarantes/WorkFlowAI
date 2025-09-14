@@ -1,0 +1,165 @@
+{% extends 'base_new.html' %}
+
+{% block title %}AI Cost Calculator - NeuralFlow{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>AI Cost Calculator</h1>
+            <p>Calculate your monthly AI costs based on usage and requirements</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="container">
+        <div class="calculator-container">
+            <div class="calculator-card">
+                <h3>Configure Your AI Usage</h3>
+                
+                <div class="form-group">
+                    <label>API Calls per Month</label>
+                    <input type="range" id="apiCalls" min="1000" max="1000000" value="10000" oninput="updateCalculator()">
+                    <span id="apiCallsValue">10,000</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Number of AI Models</label>
+                    <input type="range" id="models" min="1" max="50" value="5" oninput="updateCalculator()">
+                    <span id="modelsValue">5</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Data Storage (GB)</label>
+                    <input type="range" id="storage" min="10" max="1000" value="100" oninput="updateCalculator()">
+                    <span id="storageValue">100 GB</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Support Level</label>
+                    <select id="support" onchange="updateCalculator()">
+                        <option value="basic">Basic ($0)</option>
+                        <option value="priority">Priority (+$50)</option>
+                        <option value="dedicated">Dedicated (+$200)</option>
+                    </select>
+                </div>
+                
+                <div class="calculator-result">
+                    <h2>Monthly Cost: $<span id="totalCost">89</span></h2>
+                    <div class="cost-breakdown">
+                        <div>API Calls: $<span id="apiCost">30</span></div>
+                        <div>Models: $<span id="modelCost">25</span></div>
+                        <div>Storage: $<span id="storageCost">10</span></div>
+                        <div>Support: $<span id="supportCost">0</span></div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateQuote()">Get Custom Quote</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateCalculator() {
+    const apiCalls = document.getElementById('apiCalls').value;
+    const models = document.getElementById('models').value;
+    const storage = document.getElementById('storage').value;
+    const support = document.getElementById('support').value;
+    
+    // Update display values
+    document.getElementById('apiCallsValue').textContent = parseInt(apiCalls).toLocaleString();
+    document.getElementById('modelsValue').textContent = models;
+    document.getElementById('storageValue').textContent = storage + ' GB';
+    
+    // Calculate costs
+    const apiCost = Math.ceil(apiCalls / 1000) * 3;
+    const modelCost = models * 5;
+    const storageCost = Math.ceil(storage / 10);
+    let supportCost = 0;
+    
+    if (support === 'priority') supportCost = 50;
+    if (support === 'dedicated') supportCost = 200;
+    
+    const totalCost = apiCost + modelCost + storageCost + supportCost;
+    
+    // Update display
+    document.getElementById('apiCost').textContent = apiCost;
+    document.getElementById('modelCost').textContent = modelCost;
+    document.getElementById('storageCost').textContent = storageCost;
+    document.getElementById('supportCost').textContent = supportCost;
+    document.getElementById('totalCost').textContent = totalCost;
+}
+
+function generateQuote() {
+    const cost = document.getElementById('totalCost').textContent;
+    alert(`Your estimated monthly cost is $${cost}. Contact our sales team for a detailed quote!`);
+}
+
+// Initialize calculator
+updateCalculator();
+</script>
+
+<style>
+.calculator-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.calculator-card {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #e7ecf7;
+    font-weight: 600;
+}
+
+.form-group input[type="range"] {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(11,18,34,.9);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    color: #e7ecf7;
+}
+
+.form-group span {
+    color: #5b8cff;
+    font-weight: 600;
+}
+
+.calculator-result {
+    background: rgba(91,140,255,.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.cost-breakdown {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #a0a9c0;
+}
+
+.cost-breakdown div {
+    margin: 0.5rem 0;
+}
+</style>
+{% endblock %}

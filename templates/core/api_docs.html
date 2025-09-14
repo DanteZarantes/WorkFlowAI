@@ -1,0 +1,135 @@
+{% extends 'base_new.html' %}
+
+{% block title %}API Documentation - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>API Documentation</h1>
+        <p>Complete guide to integrating NeuralFlow AI services into your applications</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="grid grid-2" style="gap: 60px;">
+            <div>
+                <div class="card" style="margin-bottom: 30px;">
+                    <h3 style="color: #5b8cff; margin-bottom: 20px;">Quick Start</h3>
+                    <div style="background: #0d1117; padding: 20px; border-radius: 12px; border: 1px solid rgba(91,140,255,.3); margin-bottom: 16px;">
+                        <code style="color: #e7ecf7; font-family: 'Courier New', monospace;">
+curl -X POST https://api.neuralflow.ai/v1/predict \<br>
+  -H "Authorization: Bearer YOUR_API_KEY" \<br>
+  -H "Content-Type: application/json" \<br>
+  -d '{"model": "chatbot", "input": "Hello"}'
+                        </code>
+                    </div>
+                    <p style="color: #9fb0d9;">Get started with our REST API in seconds. All endpoints return JSON responses.</p>
+                </div>
+                
+                <div class="card">
+                    <h3 style="color: #5b8cff; margin-bottom: 20px;">Authentication</h3>
+                    <p style="color: #9fb0d9; margin-bottom: 16px;">All API requests require authentication using your API key:</p>
+                    <div style="background: #0d1117; padding: 16px; border-radius: 8px; border: 1px solid rgba(91,140,255,.3);">
+                        <code style="color: #e7ecf7;">Authorization: Bearer sk-1234567890abcdef</code>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h3 style="color: #5b8cff; margin-bottom: 24px;">API Endpoints</h3>
+                <div style="display: grid; gap: 20px;">
+                    <div class="card">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="background: #22c55e; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">POST</span>
+                            <code style="color: #5b8cff;">/v1/predict</code>
+                        </div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Make predictions using your deployed AI models</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">GET</span>
+                            <code style="color: #5b8cff;">/v1/models</code>
+                        </div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">List all your available AI models</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">PUT</span>
+                            <code style="color: #5b8cff;">/v1/models/{id}</code>
+                        </div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Update model configuration and settings</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">GET</span>
+                            <code style="color: #5b8cff;">/v1/analytics</code>
+                        </div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Retrieve usage analytics and performance metrics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background: rgba(11,18,34,.3);">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">SDKs & Libraries</h2>
+        </div>
+        <div class="grid grid-3">
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 3rem; color: #5b8cff; margin-bottom: 16px;">
+                    <i class="fab fa-python"></i>
+                </div>
+                <h3 style="color: #5b8cff; margin-bottom: 12px;">Python SDK</h3>
+                <p style="color: #9fb0d9; margin-bottom: 20px;">Official Python library for seamless integration</p>
+                <div style="background: #0d1117; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <code style="color: #e7ecf7; font-size: 0.9rem;">pip install neuralflow</code>
+                </div>
+                <a href="#" class="btn btn-secondary">View Docs</a>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 3rem; color: #5b8cff; margin-bottom: 16px;">
+                    <i class="fab fa-js-square"></i>
+                </div>
+                <h3 style="color: #5b8cff; margin-bottom: 12px;">JavaScript SDK</h3>
+                <p style="color: #9fb0d9; margin-bottom: 20px;">Client-side and Node.js integration library</p>
+                <div style="background: #0d1117; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <code style="color: #e7ecf7; font-size: 0.9rem;">npm install @neuralflow/sdk</code>
+                </div>
+                <a href="#" class="btn btn-secondary">View Docs</a>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 3rem; color: #5b8cff; margin-bottom: 16px;">
+                    <i class="fas fa-terminal"></i>
+                </div>
+                <h3 style="color: #5b8cff; margin-bottom: 12px;">REST API</h3>
+                <p style="color: #9fb0d9; margin-bottom: 20px;">Direct HTTP integration for any language</p>
+                <div style="background: #0d1117; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <code style="color: #e7ecf7; font-size: 0.9rem;">curl api.neuralflow.ai</code>
+                </div>
+                <a href="#" class="btn btn-secondary">View Docs</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Interactive API Playground</h2>
+            <p class="section-subtitle">Test our API endpoints directly from your browser</p>
+        </div>
+        <div class="card">
+            <div id="api-playground"></div>
+        </div>
+    </div>
+</section>
+{% endblock %}

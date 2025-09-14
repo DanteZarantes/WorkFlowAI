@@ -1,0 +1,19 @@
+/* NAVBAR FIX - Force horizontal layout */
+.nav-auth {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 15px !important;
+    flex-wrap: nowrap !important;
+}
+
+.nav-auth > * {
+    display: inline-flex !important;
+}
+
+.nav-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+}

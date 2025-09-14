@@ -1,0 +1,197 @@
+{% extends 'base_new.html' %}
+
+{% block title %}NeuralFlow - AI-Powered Business Solutions{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Transform Your Business with AI</h1>
+            <p class="hero-subtitle">NeuralFlow delivers cutting-edge artificial intelligence solutions that automate workflows, predict market trends, and accelerate your digital transformation journey.</p>
+            <div class="hero-buttons">
+                <a href="{% url 'services' %}" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    Start Your AI Journey
+                </a>
+                <a href="{% url 'about' %}" class="btn btn-secondary">
+                    <i class="fas fa-play"></i>
+                    Watch Demo
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Why Choose NeuralFlow?</h2>
+            <p class="section-subtitle">Revolutionize your business with our AI-powered platform</p>
+        </div>
+        <div class="grid grid-3">
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="card-title">Smart Automation</h3>
+                <p class="card-text">Automate complex business processes with our advanced AI algorithms that learn and adapt to your workflow patterns.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="card-title">Predictive Analytics</h3>
+                <p class="card-text">Make data-driven decisions with our machine learning models that forecast trends and identify opportunities.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="card-title">AI Chatbots</h3>
+                <p class="card-text">Deploy intelligent conversational AI that handles customer inquiries 24/7 with human-like understanding.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="card-title">Secure & Compliant</h3>
+                <p class="card-text">Enterprise-grade security with GDPR compliance and advanced encryption to protect your sensitive data.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3 class="card-title">Rapid Deployment</h3>
+                <p class="card-text">Get up and running in minutes with our cloud-native platform and seamless integration capabilities.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="card-title">Expert Support</h3>
+                <p class="card-text">Dedicated AI specialists and 24/7 technical support to ensure your success every step of the way.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Trusted by Industry Leaders</h2>
+            <p class="section-subtitle">Join thousands of companies already transforming with AI</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; align-items: center; margin-bottom: 60px;">
+            <div style="text-align: center; opacity: 0.7;">
+                <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;"><i class="fab fa-microsoft"></i></div>
+                <span style="color: #9fb0d9; font-weight: 600;">Microsoft</span>
+            </div>
+            <div style="text-align: center; opacity: 0.7;">
+                <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;"><i class="fab fa-google"></i></div>
+                <span style="color: #9fb0d9; font-weight: 600;">Google</span>
+            </div>
+            <div style="text-align: center; opacity: 0.7;">
+                <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;"><i class="fab fa-amazon"></i></div>
+                <span style="color: #9fb0d9; font-weight: 600;">Amazon</span>
+            </div>
+            <div style="text-align: center; opacity: 0.7;">
+                <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;"><i class="fab fa-apple"></i></div>
+                <span style="color: #9fb0d9; font-weight: 600;">Apple</span>
+            </div>
+            <div style="text-align: center; opacity: 0.7;">
+                <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;"><i class="fab fa-tesla"></i></div>
+                <span style="color: #9fb0d9; font-weight: 600;">Tesla</span>
+            </div>
+        </div>
+        
+        <div class="grid grid-4">
+            <div style="text-align: center; padding: 32px; background: rgba(255,255,255,.05); border-radius: 16px; border: 1px solid rgba(91,140,255,.2);">
+                <h3 style="font-size: 3rem; font-weight: 800; color: #5b8cff; margin-bottom: 8px;">10K+</h3>
+                <p style="color: #9fb0d9; font-weight: 600;">Companies Served</p>
+            </div>
+            <div style="text-align: center; padding: 32px; background: rgba(255,255,255,.05); border-radius: 16px; border: 1px solid rgba(91,140,255,.2);">
+                <h3 style="font-size: 3rem; font-weight: 800; color: #5b8cff; margin-bottom: 8px;">500M+</h3>
+                <p style="color: #9fb0d9; font-weight: 600;">API Calls Processed</p>
+            </div>
+            <div style="text-align: center; padding: 32px; background: rgba(255,255,255,.05); border-radius: 16px; border: 1px solid rgba(91,140,255,.2);">
+                <h3 style="font-size: 3rem; font-weight: 800; color: #5b8cff; margin-bottom: 8px;">99.9%</h3>
+                <p style="color: #9fb0d9; font-weight: 600;">Uptime Guarantee</p>
+            </div>
+            <div style="text-align: center; padding: 32px; background: rgba(255,255,255,.05); border-radius: 16px; border: 1px solid rgba(91,140,255,.2);">
+                <h3 style="font-size: 3rem; font-weight: 800; color: #5b8cff; margin-bottom: 8px;">24/7</h3>
+                <p style="color: #9fb0d9; font-weight: 600;">Expert Support</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background: rgba(11,18,34,.3);">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Customer Success Stories</h2>
+        </div>
+        <div class="grid grid-3">
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #5b8cff, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-quote-left" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h4 style="color: #5b8cff; margin-bottom: 4px;">TechCorp Inc.</h4>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Fortune 500 Company</p>
+                    </div>
+                </div>
+                <p class="card-text" style="font-style: italic; margin-bottom: 16px;">"NeuralFlow's AI chatbot reduced our customer service response time by 75% and improved satisfaction scores significantly."</p>
+                <div style="color: #5b8cff; font-weight: 600;">- Sarah Johnson, CTO</div>
+            </div>
+            
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #764ba2, #667eea); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-quote-left" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h4 style="color: #5b8cff; margin-bottom: 4px;">RetailMax</h4>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">E-commerce Platform</p>
+                    </div>
+                </div>
+                <p class="card-text" style="font-style: italic; margin-bottom: 16px;">"The predictive analytics model increased our sales conversion rate by 40% and helped us optimize inventory management."</p>
+                <div style="color: #5b8cff; font-weight: 600;">- Michael Chen, VP Marketing</div>
+            </div>
+            
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                    <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea, #5b8cff); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-quote-left" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h4 style="color: #5b8cff; margin-bottom: 4px;">HealthTech Solutions</h4>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Healthcare Technology</p>
+                    </div>
+                </div>
+                <p class="card-text" style="font-style: italic; margin-bottom: 16px;">"Computer vision models helped us automate medical image analysis, reducing diagnosis time from hours to minutes."</p>
+                <div style="color: #5b8cff; font-weight: 600;">- Dr. Emily Rodriguez, Chief Medical Officer</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2 class="cta-title">Ready to Embrace the Future?</h2>
+        <p class="cta-text">Join over 10,000+ companies already transforming their business with NeuralFlow AI</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'signup' %}" class="btn btn-primary">
+                <i class="fas fa-star"></i>
+                Start Free Trial
+            </a>
+        {% else %}
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i>
+                Access Dashboard
+            </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

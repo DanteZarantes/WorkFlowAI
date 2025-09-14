@@ -1,0 +1,167 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Settings - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Account Settings</h1>
+            <p class="section-subtitle">Manage your account preferences and configurations</p>
+        </div>
+        
+        <div class="grid grid-2" style="gap: 60px;">
+            <div>
+                <div class="card" style="margin-bottom: 30px;">
+                    <h3 style="color: #5b8cff; margin-bottom: 24px;">API Configuration</h3>
+                    <div style="display: grid; gap: 20px;">
+                        <div>
+                            <label style="display: block; color: #9fb0d9; margin-bottom: 8px; font-weight: 500;">API Key</label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" value="sk-1234567890abcdef..." readonly style="flex: 1; padding: 16px; background: rgba(255,255,255,.05); border: 2px solid rgba(91,140,255,.2); border-radius: 12px; color: #e7ecf7; font-family: 'Courier New', monospace;">
+                                <button class="btn btn-secondary">
+                                    <i class="fas fa-copy"></i>
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #9fb0d9; margin-bottom: 8px; font-weight: 500;">Rate Limit</label>
+                            <select style="width: 100%; padding: 16px; background: rgba(255,255,255,.05); border: 2px solid rgba(91,140,255,.2); border-radius: 12px; color: #e7ecf7;">
+                                <option>1000 requests/hour</option>
+                                <option>5000 requests/hour</option>
+                                <option>10000 requests/hour</option>
+                                <option>Unlimited</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn-primary">
+                            <i class="fas fa-key"></i>
+                            Regenerate API Key
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 style="color: #5b8cff; margin-bottom: 24px;">Billing & Usage</h3>
+                    <div style="display: grid; gap: 20px;">
+                        <div style="display: flex; justify-content: space-between; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                            <span style="color: #9fb0d9;">Current Plan:</span>
+                            <span style="color: #5b8cff; font-weight: 600;">Professional</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                            <span style="color: #9fb0d9;">API Calls This Month:</span>
+                            <span style="color: #5b8cff; font-weight: 600;">45,230 / 100,000</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                            <span style="color: #9fb0d9;">Next Billing Date:</span>
+                            <span style="color: #5b8cff; font-weight: 600;">January 15, 2025</span>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px;">
+                            <a href="{% url 'pricing' %}" class="btn btn-secondary" style="flex: 1;">
+                                <i class="fas fa-credit-card"></i>
+                                Change Plan
+                            </a>
+                            <button class="btn btn-secondary" style="flex: 1;">
+                                <i class="fas fa-download"></i>
+                                Download Invoice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="card" style="margin-bottom: 30px;">
+                    <h3 style="color: #5b8cff; margin-bottom: 24px;">Notifications</h3>
+                    <div style="display: grid; gap: 20px;">
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: #5b8cff;">
+                            <div>
+                                <div style="color: #e7ecf7; font-weight: 500;">Email Notifications</div>
+                                <div style="color: #9fb0d9; font-size: 0.9rem;">Receive updates about your AI models</div>
+                            </div>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" style="width: 18px; height: 18px; accent-color: #5b8cff;">
+                            <div>
+                                <div style="color: #e7ecf7; font-weight: 500;">SMS Alerts</div>
+                                <div style="color: #9fb0d9; font-size: 0.9rem;">Critical alerts and downtime notifications</div>
+                            </div>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: #5b8cff;">
+                            <div>
+                                <div style="color: #e7ecf7; font-weight: 500;">Weekly Reports</div>
+                                <div style="color: #9fb0d9; font-size: 0.9rem;">Performance summaries and insights</div>
+                            </div>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                            <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: #5b8cff;">
+                            <div>
+                                <div style="color: #e7ecf7; font-weight: 500;">Product Updates</div>
+                                <div style="color: #9fb0d9; font-size: 0.9rem;">New features and improvements</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 style="color: #5b8cff; margin-bottom: 24px;">Security</h3>
+                    <div style="display: grid; gap: 20px;">
+                        <div>
+                            <label style="display: block; color: #9fb0d9; margin-bottom: 8px; font-weight: 500;">Two-Factor Authentication</label>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,.05); border-radius: 12px;">
+                                <div>
+                                    <div style="color: #e7ecf7; font-weight: 500;">Disabled</div>
+                                    <div style="color: #9fb0d9; font-size: 0.9rem;">Add an extra layer of security</div>
+                                </div>
+                                <button class="btn btn-primary btn-sm">Enable</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #9fb0d9; margin-bottom: 8px; font-weight: 500;">Login Sessions</label>
+                            <div style="display: grid; gap: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,.05); border-radius: 8px;">
+                                    <div>
+                                        <div style="color: #e7ecf7; font-size: 0.9rem;">Current Session</div>
+                                        <div style="color: #9fb0d9; font-size: 0.8rem;">Chrome on Windows • San Francisco, CA</div>
+                                    </div>
+                                    <span style="color: #22c55e; font-size: 0.8rem;">Active</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,.05); border-radius: 8px;">
+                                    <div>
+                                        <div style="color: #e7ecf7; font-size: 0.9rem;">Mobile App</div>
+                                        <div style="color: #9fb0d9; font-size: 0.8rem;">iPhone • 2 days ago</div>
+                                    </div>
+                                    <button style="color: #ef4444; background: none; border: none; cursor: pointer; font-size: 0.8rem;">Revoke</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-secondary btn-full">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Sign Out All Devices
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 60px;">
+            <button class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Save Changes
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}

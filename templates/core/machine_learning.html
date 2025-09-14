@@ -1,0 +1,189 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Machine Learning Solutions - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Machine Learning Solutions</h1>
+        <p>Advanced ML algorithms and models tailored for your business needs</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="grid grid-2" style="gap: 60px; align-items: center;">
+            <div>
+                <h2 style="color: #5b8cff; font-size: 2.5rem; margin-bottom: 24px;">Custom ML Models</h2>
+                <p style="color: #9fb0d9; font-size: 1.1rem; line-height: 1.7; margin-bottom: 32px;">
+                    Our machine learning experts build custom models using state-of-the-art algorithms including deep neural networks, 
+                    ensemble methods, and transformer architectures. From supervised learning to reinforcement learning, 
+                    we deliver solutions that drive real business value.
+                </p>
+                <div style="display: grid; gap: 16px; margin-bottom: 32px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-check-circle" style="color: #5b8cff;"></i>
+                        <span style="color: #e7ecf7;">Custom neural network architectures</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-check-circle" style="color: #5b8cff;"></i>
+                        <span style="color: #e7ecf7;">Advanced feature engineering</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-check-circle" style="color: #5b8cff;"></i>
+                        <span style="color: #e7ecf7;">Automated hyperparameter tuning</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-check-circle" style="color: #5b8cff;"></i>
+                        <span style="color: #e7ecf7;">Real-time model deployment</span>
+                    </div>
+                </div>
+                <a href="{% url 'contact' %}" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    Start Your ML Project
+                </a>
+            </div>
+            <div style="height: 400px; background: linear-gradient(135deg, rgba(91,140,255,.2), rgba(118,75,162,.2)); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(91,140,255,.3);">
+                <i class="fas fa-brain" style="font-size: 6rem; color: #5b8cff;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background: rgba(11,18,34,.3);">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">ML Algorithms We Master</h2>
+        </div>
+        <div class="grid grid-3">
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3 class="card-title">Deep Learning</h3>
+                <p class="card-text">Convolutional Neural Networks (CNNs), Recurrent Neural Networks (RNNs), Transformers, and GANs for complex pattern recognition.</p>
+                <div style="margin-top: 16px;">
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">TensorFlow</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">PyTorch</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">Keras</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-tree"></i>
+                </div>
+                <h3 class="card-title">Ensemble Methods</h3>
+                <p class="card-text">Random Forest, Gradient Boosting, XGBoost, and LightGBM for robust predictions with high accuracy and interpretability.</p>
+                <div style="margin-top: 16px;">
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">XGBoost</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">LightGBM</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">CatBoost</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-language"></i>
+                </div>
+                <h3 class="card-title">Natural Language Processing</h3>
+                <p class="card-text">BERT, GPT, T5, and custom transformer models for text analysis, sentiment analysis, and language generation.</p>
+                <div style="margin-top: 16px;">
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">BERT</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">GPT</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">spaCy</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="card-title">Time Series Forecasting</h3>
+                <p class="card-text">ARIMA, LSTM, Prophet, and seasonal decomposition models for accurate predictions of temporal data patterns.</p>
+                <div style="margin-top: 16px;">
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">Prophet</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">LSTM</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">ARIMA</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <h3 class="card-title">Clustering & Segmentation</h3>
+                <p class="card-text">K-means, DBSCAN, hierarchical clustering, and advanced dimensionality reduction techniques for data insights.</p>
+                <div style="margin-top: 16px;">
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">K-means</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">DBSCAN</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">PCA</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3 class="card-title">Reinforcement Learning</h3>
+                <p class="card-text">Q-learning, policy gradients, and actor-critic methods for autonomous decision-making and optimization problems.</p>
+                <div style="margin-top: 16px;">
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">OpenAI Gym</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 8px;">PPO</span>
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem;">DQN</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">ML Development Process</h2>
+        </div>
+        <div class="grid grid-4">
+            <div class="card" style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #5b8cff, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem; font-weight: bold;">1</div>
+                <h3 class="card-title">Data Analysis</h3>
+                <p class="card-text">Comprehensive data exploration, quality assessment, and feature engineering to understand your dataset.</p>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #764ba2, #667eea); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem; font-weight: bold;">2</div>
+                <h3 class="card-title">Model Selection</h3>
+                <p class="card-text">Choose the optimal algorithm based on your data characteristics, business requirements, and performance goals.</p>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem; font-weight: bold;">3</div>
+                <h3 class="card-title">Training & Validation</h3>
+                <p class="card-text">Rigorous model training with cross-validation, hyperparameter optimization, and performance evaluation.</p>
+            </div>
+            
+            <div class="card" style="text-align: center;">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #5b8cff, #667eea); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 2rem; font-weight: bold;">4</div>
+                <h3 class="card-title">Deployment & Monitoring</h3>
+                <p class="card-text">Seamless production deployment with continuous monitoring, A/B testing, and model performance tracking.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <h2 class="cta-title">Ready to Build Your ML Solution?</h2>
+        <p class="cta-text">Let our machine learning experts create a custom solution that transforms your business data into actionable insights</p>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'contact' %}" class="btn btn-primary">
+                <i class="fas fa-calendar-alt"></i>
+                Schedule Consultation
+            </a>
+            <a href="{% url 'pricing' %}" class="btn btn-secondary">
+                <i class="fas fa-dollar-sign"></i>
+                View Pricing
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

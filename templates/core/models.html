@@ -1,0 +1,165 @@
+{% extends 'base_new.html' %}
+
+{% block title %}AI Models - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">Your AI Models</h1>
+            <p class="section-subtitle">Manage and deploy your machine learning models</p>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+            <div style="display: flex; gap: 16px;">
+                <button class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Deploy New Model
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-upload"></i>
+                    Import Model
+                </button>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <select style="padding: 12px; background: rgba(255,255,255,.05); border: 2px solid rgba(91,140,255,.2); border-radius: 8px; color: #e7ecf7;">
+                    <option>All Models</option>
+                    <option>Active</option>
+                    <option>Training</option>
+                    <option>Inactive</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="grid grid-2" style="gap: 30px;">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="color: #5b8cff; margin-bottom: 8px;">Customer Support Chatbot</h3>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Natural Language Processing</p>
+                    </div>
+                    <span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Active</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">94.2%</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">Accuracy</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">1.2K</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">Daily Requests</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-chart-line"></i>
+                        View Analytics
+                    </button>
+                    <button class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-cog"></i>
+                        Configure
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="color: #5b8cff; margin-bottom: 8px;">Sales Prediction Model</h3>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Time Series Forecasting</p>
+                    </div>
+                    <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Training</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">87.5%</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">Progress</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">2h</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">ETA</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-pause"></i>
+                        Pause Training
+                    </button>
+                    <button class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-eye"></i>
+                        Monitor
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="color: #5b8cff; margin-bottom: 8px;">Image Classification</h3>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Computer Vision</p>
+                    </div>
+                    <span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Active</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">96.8%</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">Accuracy</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">856</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">Daily Requests</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-chart-line"></i>
+                        View Analytics
+                    </button>
+                    <button class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-cog"></i>
+                        Configure
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="color: #5b8cff; margin-bottom: 8px;">Sentiment Analysis</h3>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Text Classification</p>
+                    </div>
+                    <span style="background: #6b7280; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Inactive</span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">91.3%</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">Last Accuracy</div>
+                    </div>
+                    <div style="text-align: center; padding: 16px; background: rgba(91,140,255,.1); border-radius: 12px;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #5b8cff;">0</div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9;">Daily Requests</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-primary" style="flex: 1;">
+                        <i class="fas fa-play"></i>
+                        Activate
+                    </button>
+                    <button class="btn btn-secondary" style="flex: 1;">
+                        <i class="fas fa-trash"></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

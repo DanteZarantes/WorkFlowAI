@@ -1,0 +1,350 @@
+{% extends 'base_new.html' %}
+
+{% block title %}AI Visualization - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">AI Neural Network Visualization</h1>
+            <p class="section-subtitle">Interactive 3D representation of our AI models in action</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 300px; gap: 40px; align-items: start;">
+            <div>
+                <div id="neural-network-3d" style="width: 100%; height: 600px; background: rgba(255,255,255,.05); border-radius: 16px; border: 1px solid rgba(91,140,255,.3); position: relative; overflow: hidden;"></div>
+                
+                <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div class="card" style="text-align: center;">
+                        <h4 style="color: #5b8cff; margin-bottom: 8px;">Input Layer</h4>
+                        <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;">784</div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Neurons</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <h4 style="color: #5b8cff; margin-bottom: 8px;">Hidden Layers</h4>
+                        <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;">3</div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Layers</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <h4 style="color: #5b8cff; margin-bottom: 8px;">Output Layer</h4>
+                        <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;">10</div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Classes</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <h4 style="color: #5b8cff; margin-bottom: 8px;">Accuracy</h4>
+                        <div style="font-size: 2rem; color: #5b8cff; margin-bottom: 8px;" id="accuracy-display">94.2%</div>
+                        <p style="color: #9fb0d9; font-size: 0.9rem;">Current</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="card">
+                    <h3 style="color: #5b8cff; margin-bottom: 20px;">Network Controls</h3>
+                    <div style="display: grid; gap: 16px;">
+                        <div>
+                            <label style="display: block; color: #9fb0d9; margin-bottom: 8px;">Learning Rate</label>
+                            <input type="range" id="learning-rate" min="0.001" max="0.1" step="0.001" value="0.01" style="width: 100%; accent-color: #5b8cff;">
+                            <span id="lr-value" style="color: #5b8cff; font-size: 0.9rem;">0.01</span>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #9fb0d9; margin-bottom: 8px;">Batch Size</label>
+                            <select id="batch-size" style="width: 100%; padding: 8px; background: rgba(255,255,255,.05); border: 1px solid rgba(91,140,255,.3); border-radius: 8px; color: #e7ecf7;">
+                                <option value="32">32</option>
+                                <option value="64" selected>64</option>
+                                <option value="128">128</option>
+                                <option value="256">256</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; color: #9fb0d9; margin-bottom: 8px;">Activation Function</label>
+                            <select id="activation" style="width: 100%; padding: 8px; background: rgba(255,255,255,.05); border: 1px solid rgba(91,140,255,.3); border-radius: 8px; color: #e7ecf7;">
+                                <option value="relu" selected>ReLU</option>
+                                <option value="sigmoid">Sigmoid</option>
+                                <option value="tanh">Tanh</option>
+                                <option value="leaky-relu">Leaky ReLU</option>
+                            </select>
+                        </div>
+                        
+                        <button id="start-training" class="btn btn-primary btn-full" style="margin-top: 16px;">
+                            <i class="fas fa-play"></i>
+                            Start Training
+                        </button>
+                        
+                        <button id="reset-network" class="btn btn-secondary btn-full">
+                            <i class="fas fa-redo"></i>
+                            Reset Network
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <h4 style="color: #5b8cff; margin-bottom: 16px;">Training Progress</h4>
+                    <div style="display: grid; gap: 12px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="color: #9fb0d9; font-size: 0.9rem;">Epoch Progress</span>
+                                <span id="epoch-progress" style="color: #5b8cff; font-size: 0.9rem;">0/100</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(91,140,255,.2); border-radius: 4px; overflow: hidden;">
+                                <div id="epoch-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #5b8cff, #764ba2); transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="color: #9fb0d9; font-size: 0.9rem;">Loss</span>
+                                <span id="loss-value" style="color: #5b8cff; font-size: 0.9rem;">0.045</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(91,140,255,.2); border-radius: 4px; overflow: hidden;">
+                                <div id="loss-bar" style="width: 25%; height: 100%; background: linear-gradient(90deg, #ef4444, #f59e0b); transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// 3D Neural Network Visualization with Three.js
+class NeuralNetworkVisualization {
+    constructor(container) {
+        this.container = container;
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        this.neurons = [];
+        this.connections = [];
+        this.isTraining = false;
+        
+        this.init();
+        this.createNetwork();
+        this.animate();
+    }
+    
+    init() {
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.renderer.setClearColor(0x000000, 0);
+        this.container.appendChild(this.renderer.domElement);
+        
+        this.camera.position.z = 15;
+        this.camera.position.y = 2;
+        
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        this.scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0x5b8cff, 0.8);
+        directionalLight.position.set(10, 10, 5);
+        this.scene.add(directionalLight);
+        
+        // Mouse controls
+        let mouseX = 0, mouseY = 0;
+        this.container.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / this.container.clientWidth) * 2 - 1;
+            mouseY = -(event.clientY / this.container.clientHeight) * 2 + 1;
+            
+            this.camera.position.x = mouseX * 2;
+            this.camera.position.y = mouseY * 2 + 2;
+            this.camera.lookAt(0, 0, 0);
+        });
+    }
+    
+    createNetwork() {
+        const layers = [8, 16, 12, 8, 4]; // Network architecture
+        const layerSpacing = 6;
+        
+        // Create neurons
+        layers.forEach((neuronCount, layerIndex) => {
+            const layerNeurons = [];
+            const x = (layerIndex - layers.length / 2) * layerSpacing;
+            
+            for (let i = 0; i < neuronCount; i++) {
+                const y = (i - neuronCount / 2) * 1.5;
+                
+                const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+                const material = new THREE.MeshPhongMaterial({ 
+                    color: 0x5b8cff,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                const neuron = new THREE.Mesh(geometry, material);
+                neuron.position.set(x, y, 0);
+                neuron.userData = { layer: layerIndex, index: i, activation: 0 };
+                
+                this.scene.add(neuron);
+                layerNeurons.push(neuron);
+            }
+            
+            this.neurons.push(layerNeurons);
+        });
+        
+        // Create connections
+        for (let i = 0; i < this.neurons.length - 1; i++) {
+            const currentLayer = this.neurons[i];
+            const nextLayer = this.neurons[i + 1];
+            
+            currentLayer.forEach(neuron1 => {
+                nextLayer.forEach(neuron2 => {
+                    const geometry = new THREE.BufferGeometry().setFromPoints([
+                        neuron1.position,
+                        neuron2.position
+                    ]);
+                    
+                    const material = new THREE.LineBasicMaterial({ 
+                        color: 0x5b8cff,
+                        transparent: true,
+                        opacity: 0.3
+                    });
+                    
+                    const connection = new THREE.Line(geometry, material);
+                    connection.userData = { weight: Math.random() * 2 - 1 };
+                    
+                    this.scene.add(connection);
+                    this.connections.push(connection);
+                });
+            });
+        }
+    }
+    
+    startTraining() {
+        this.isTraining = true;
+        let epoch = 0;
+        const maxEpochs = 100;
+        
+        const trainingLoop = () => {
+            if (!this.isTraining || epoch >= maxEpochs) {
+                this.isTraining = false;
+                return;
+            }
+            
+            // Simulate forward pass
+            this.neurons.forEach((layer, layerIndex) => {
+                layer.forEach(neuron => {
+                    const activation = Math.random();
+                    neuron.userData.activation = activation;
+                    
+                    // Update neuron color based on activation
+                    const intensity = activation;
+                    neuron.material.color.setRGB(
+                        0.36 + intensity * 0.4,
+                        0.55 + intensity * 0.3,
+                        1.0
+                    );
+                    neuron.material.opacity = 0.5 + intensity * 0.5;
+                });
+            });
+            
+            // Update connections
+            this.connections.forEach(connection => {
+                const weight = connection.userData.weight;
+                const opacity = Math.abs(weight) * 0.5;
+                connection.material.opacity = opacity;
+                
+                if (weight > 0) {
+                    connection.material.color.setHex(0x5b8cff);
+                } else {
+                    connection.material.color.setHex(0xff5b7e);
+                }
+            });
+            
+            // Update UI
+            epoch++;
+            document.getElementById('epoch-progress').textContent = `${epoch}/${maxEpochs}`;
+            document.getElementById('epoch-bar').style.width = `${(epoch / maxEpochs) * 100}%`;
+            
+            const loss = 1 / (1 + epoch * 0.1) + Math.random() * 0.01;
+            document.getElementById('loss-value').textContent = loss.toFixed(4);
+            document.getElementById('loss-bar').style.width = `${loss * 100}%`;
+            
+            const accuracy = 85 + (epoch / maxEpochs) * 10 + Math.random() * 2;
+            document.getElementById('accuracy-display').textContent = `${accuracy.toFixed(1)}%`;
+            
+            setTimeout(trainingLoop, 100);
+        };
+        
+        trainingLoop();
+    }
+    
+    resetNetwork() {
+        this.isTraining = false;
+        
+        // Reset neurons
+        this.neurons.forEach(layer => {
+            layer.forEach(neuron => {
+                neuron.material.color.setHex(0x5b8cff);
+                neuron.material.opacity = 0.8;
+                neuron.userData.activation = 0;
+            });
+        });
+        
+        // Reset connections
+        this.connections.forEach(connection => {
+            connection.material.color.setHex(0x5b8cff);
+            connection.material.opacity = 0.3;
+            connection.userData.weight = Math.random() * 2 - 1;
+        });
+        
+        // Reset UI
+        document.getElementById('epoch-progress').textContent = '0/100';
+        document.getElementById('epoch-bar').style.width = '0%';
+        document.getElementById('loss-value').textContent = '1.000';
+        document.getElementById('loss-bar').style.width = '100%';
+        document.getElementById('accuracy-display').textContent = '85.0%';
+    }
+    
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        // Rotate the entire network slowly
+        this.scene.rotation.y += 0.005;
+        
+        // Add floating animation to neurons
+        this.neurons.forEach((layer, layerIndex) => {
+            layer.forEach((neuron, neuronIndex) => {
+                neuron.position.y += Math.sin(Date.now() * 0.001 + layerIndex + neuronIndex) * 0.002;
+            });
+        });
+        
+        this.renderer.render(this.scene, this.camera);
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('neural-network-3d');
+    if (container) {
+        const visualization = new NeuralNetworkVisualization(container);
+        
+        // Control event listeners
+        document.getElementById('start-training').addEventListener('click', () => {
+            visualization.startTraining();
+        });
+        
+        document.getElementById('reset-network').addEventListener('click', () => {
+            visualization.resetNetwork();
+        });
+        
+        document.getElementById('learning-rate').addEventListener('input', (e) => {
+            document.getElementById('lr-value').textContent = e.target.value;
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            visualization.camera.aspect = width / height;
+            visualization.camera.updateProjectionMatrix();
+            visualization.renderer.setSize(width, height);
+        });
+    }
+});
+</script>
+{% endblock %}
