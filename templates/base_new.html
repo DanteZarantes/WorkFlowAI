@@ -814,7 +814,12 @@
                             <a href="{% url 'user_directory' %}"><i class="fas fa-users"></i> Find Users</a>
                             <a href="{% url 'theme_settings' %}"><i class="fas fa-palette"></i> Theme</a>
                             <div class="dropdown-divider"></div>
-                            <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; padding: 12px 16px; width: 100%; text-align: left; display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </button>
+                            </form>
                         </div>
                     </div>
                 {% else %}
@@ -946,9 +951,9 @@
         {% block content %}{% endblock %}
     </main>
     
-    <!-- Interactive Features Scripts -->
-    <script src="{% static 'js/interactive-features.js' %}"></script>
-    <script src="{% static 'js/react-components.js' %}"></script>
-    <script src="{% static 'js/api-playground.js' %}"></script>
+    <!-- Interactive Features Scripts - Temporarily disabled for login testing -->
+    <!-- <script src="{% static 'js/interactive-features.js' %}"></script> -->
+    <!-- <script src="{% static 'js/react-components.js' %}"></script> -->
+    <!-- <script src="{% static 'js/api-playground.js' %}"></script> -->
 </body>
 </html>

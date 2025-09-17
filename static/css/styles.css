@@ -1,6 +1,13 @@
 /* Reset and Base Styles */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+:root {
+  --blue: #5b8cff;
+  --text: #e7ecf7;
+  --muted: #9fb0d9;
+  --radius: 22px;
+}
+
 html { scroll-behavior: smooth; }
 
 body {

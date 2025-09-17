@@ -311,8 +311,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize smooth animations
     new SmoothAnimations();
     
-    // Add form validation to contact forms
-    const forms = document.querySelectorAll('form');
+    // Add form validation to contact forms (exclude auth forms)
+    const forms = document.querySelectorAll('form:not(.auth-form)');
     forms.forEach(form => {
         const validator = new FormValidator(form);
         
@@ -348,19 +348,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add loading states to buttons
-    document.querySelectorAll('button[type="submit"], .btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (this.type === 'submit' || this.classList.contains('loading-btn')) {
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-                this.disabled = true;
-                
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                }, 2000);
-            }
-        });
-    });
+    // Removed problematic loading state code that was preventing form submission
 });
