@@ -20,6 +20,16 @@ import os
 # Points to the root directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# --- ensure logs dir exists BEFORE logging config ---
+LOG_DIR = BASE_DIR / 'logs'
+try:
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    # if cannot create, fall back to BASE_DIR (won't crash logging)
+    LOG_DIR = BASE_DIR
+LOG_FILE = LOG_DIR / 'django.log'
+# ----------------------------------------------------
+
 # Security
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
@@ -112,7 +122,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Authentication
 AUTH_USER_MODEL = 'accounts.CustomUser'
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.EmailBackend',
+    'accounts.backends.EmailBackend',           # ваш кастомный backend (если используется)
     'django.contrib.auth.backends.ModelBackend',
 ]
 LOGIN_URL = '/accounts/login/'
@@ -137,6 +147,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
+# CSRF (важно для локальной формы логина)
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 # Logging
 LOGGING = {
     'version': 1,
@@ -154,8 +170,11 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_FILE),            # guaranteed to exist (or fallback to BASE_DIR)
+            'maxBytes': 5 * 1024 * 1024,         # 5MB
+            'backupCount': 3,
+            'encoding': 'utf-8',
             'formatter': 'verbose',
         },
         'console': {

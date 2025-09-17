@@ -1,0 +1,764 @@
+{% extends 'base_new.html' %}
+
+{% block title %}AI Dashboard - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="section" style="padding: 0; height: 100vh; overflow: hidden;">
+    <div class="dashboard-container">
+        <header class="dashboard-toolbar">
+            <div class="toolbar-left">
+                <a href="{% url 'project_boards' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Boards
+                </a>
+                <h1 id="boardTitle">AI Project Dashboard</h1>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-secondary" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-primary" id="exportBtn">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </header>
+        
+        <div class="dashboard-content">
+            <!-- Key Metrics Row -->
+            <div class="metrics-row">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="totalTasks">0</div>
+                        <div class="metric-label">Total Tasks</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="completedTasks">0</div>
+                        <div class="metric-label">Completed</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="pendingTasks">0</div>
+                        <div class="metric-label">In Progress</div>
+                    </div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="metric-content">
+                        <div class="metric-value" id="overdueTasks">0</div>
+                        <div class="metric-label">Overdue</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Task Progress</h3>
+                        <div class="chart-controls">
+                            <select id="progressPeriod">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Priority Distribution</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Activity and Recent Tasks Row -->
+            <div class="activity-row">
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <h3>Recent Activity</h3>
+                        <span class="activity-count" id="activityCount">0 activities</span>
+                    </div>
+                    <div class="activity-list" id="activityList">
+                        <!-- Activity items will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="tasks-card">
+                    <div class="tasks-header">
+                        <h3>Upcoming Deadlines</h3>
+                        <span class="tasks-count" id="upcomingCount">0 tasks</span>
+                    </div>
+                    <div class="tasks-list" id="upcomingTasks">
+                        <!-- Upcoming tasks will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.dashboard-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #070f1f;
+    background:
+        radial-gradient(1400px 700px at 10% -10%, #0f1a3a 0%, transparent 60%),
+        radial-gradient(1200px 600px at 90% 0%, #081532 0%, transparent 60%),
+        linear-gradient(#081226, #070f1f 60%, #070f1f);
+    background-attachment: fixed, fixed, fixed;
+}
+
+.dashboard-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(10,17,32,.65);
+    border-bottom: 1px solid rgba(91,140,255,.2);
+    backdrop-filter: blur(20px);
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+
+.toolbar-left, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar-left h1 {
+    color: #e7ecf7;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.dashboard-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Metrics Row */
+.metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.metric-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91,140,255,.2);
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    color: white;
+}
+
+.metric-content {
+    flex: 1;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #e7ecf7;
+    line-height: 1;
+}
+
+.metric-label {
+    color: #9fb0d9;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+/* Charts Row */
+.charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+}
+
+.chart-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.chart-header h3 {
+    color: #e7ecf7;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.chart-controls select {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    color: #e7ecf7;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+/* Activity Row */
+.activity-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.activity-card, .tasks-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-header, .tasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.activity-header h3, .tasks-header h3 {
+    color: #e7ecf7;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.activity-count, .tasks-count {
+    color: #9fb0d9;
+    font-size: 0.8rem;
+}
+
+.activity-list, .tasks-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(91,140,255,.1);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.activity-icon.created {
+    background: rgba(34,197,94,.2);
+    color: #22c55e;
+}
+
+.activity-icon.completed {
+    background: rgba(91,140,255,.2);
+    color: #5b8cff;
+}
+
+.activity-icon.updated {
+    background: rgba(245,158,11,.2);
+    color: #f59e0b;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    color: #e7ecf7;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    color: #9fb0d9;
+    font-size: 0.8rem;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(91,140,255,.1);
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+.task-priority {
+    width: 8px;
+    height: 32px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.task-priority.high {
+    background: #ef4444;
+}
+
+.task-priority.medium {
+    background: #f59e0b;
+}
+
+.task-priority.low {
+    background: #22c55e;
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-title {
+    color: #e7ecf7;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.task-due {
+    color: #9fb0d9;
+    font-size: 0.8rem;
+}
+
+.task-due.overdue {
+    color: #ef4444;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,.06);
+    color: #5b8cff;
+    border: 1px solid rgba(91,140,255,.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(91,140,255,.1);
+    border-color: #5b8cff;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .metrics-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .activity-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-content {
+        padding: 1rem;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get current board from session storage
+    const currentBoard = JSON.parse(sessionStorage.getItem('current_board') || '{}');
+    document.getElementById('boardTitle').textContent = currentBoard.name || 'AI Project Dashboard';
+    
+    // Data aggregation from all project management tools
+    const boardId = currentBoard.id || 'default';
+    const kanbanData = JSON.parse(localStorage.getItem(`neuralflow-kanban-${boardId}`) || '[]');
+    const mindmapData = JSON.parse(localStorage.getItem(`neuralflow_mindmap_${boardId}`) || '{"nodes": []}');
+    const treeData = JSON.parse(localStorage.getItem(`neuralflow_tree_${boardId}`) || '{"nodes": []}');
+    
+    // Combine all tasks from different sources
+    let allTasks = [];
+    
+    // Add Kanban tasks
+    kanbanData.forEach(task => {
+        allTasks.push({
+            id: task.id,
+            title: task.text,
+            type: 'kanban',
+            priority: task.pri,
+            due: task.due,
+            completed: task.done,
+            created: new Date().toISOString() // Fallback
+        });
+    });
+    
+    // Add Mindmap nodes
+    mindmapData.nodes.forEach(node => {
+        allTasks.push({
+            id: node.id,
+            title: node.title,
+            type: 'mindmap',
+            priority: node.priority || 'medium',
+            due: node.due,
+            completed: node.status === 'done',
+            created: new Date().toISOString()
+        });
+    });
+    
+    // Add Tree tasks (recursive function to flatten hierarchy)
+    function flattenTreeNodes(nodes) {
+        let flattened = [];
+        nodes.forEach(node => {
+            flattened.push({
+                id: node.id,
+                title: node.title,
+                type: 'tree',
+                priority: node.priority || 'medium',
+                due: node.due,
+                completed: node.status === 'done',
+                created: new Date().toISOString()
+            });
+            if (node.children && node.children.length > 0) {
+                flattened = flattened.concat(flattenTreeNodes(node.children));
+            }
+        });
+        return flattened;
+    }
+    
+    allTasks = allTasks.concat(flattenTreeNodes(treeData.nodes));
+    
+    // Calculate metrics
+    function updateMetrics() {
+        const total = allTasks.length;
+        const completed = allTasks.filter(t => t.completed).length;
+        const pending = allTasks.filter(t => !t.completed).length;
+        const today = new Date().toISOString().slice(0, 10);
+        const overdue = allTasks.filter(t => !t.completed && t.due && t.due < today).length;
+        
+        document.getElementById('totalTasks').textContent = total;
+        document.getElementById('completedTasks').textContent = completed;
+        document.getElementById('pendingTasks').textContent = pending;
+        document.getElementById('overdueTasks').textContent = overdue;
+    }
+    
+    // Create progress chart
+    function createProgressChart() {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const days = 30;
+        const labels = [];
+        const completedData = [];
+        const createdData = [];
+        
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().slice(0, 10);
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            
+            // Simulate data (in real app, you'd track actual completion dates)
+            const completed = Math.floor(Math.random() * 5) + (i < 7 ? 2 : 0);
+            const created = Math.floor(Math.random() * 3) + 1;
+            
+            completedData.push(completed);
+            createdData.push(created);
+        }
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Tasks Completed',
+                    data: completedData,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Tasks Created',
+                    data: createdData,
+                    borderColor: '#5b8cff',
+                    backgroundColor: 'rgba(91, 140, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e7ecf7'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#9fb0d9'
+                        },
+                        grid: {
+                            color: 'rgba(91, 140, 255, 0.1)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#9fb0d9'
+                        },
+                        grid: {
+                            color: 'rgba(91, 140, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Create priority distribution chart
+    function createPriorityChart() {
+        const ctx = document.getElementById('priorityChart').getContext('2d');
+        const priorities = { high: 0, medium: 0, low: 0 };
+        
+        allTasks.forEach(task => {
+            const pri = task.priority === 'h' ? 'high' : task.priority === 'm' ? 'medium' : 'low';
+            priorities[pri]++;
+        });
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['High Priority', 'Medium Priority', 'Low Priority'],
+                datasets: [{
+                    data: [priorities.high, priorities.medium, priorities.low],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#22c55e'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#e7ecf7',
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Update recent activity
+    function updateActivity() {
+        const activityList = document.getElementById('activityList');
+        const activities = [
+            { type: 'created', text: 'New AI model training task created', time: '2 hours ago' },
+            { type: 'completed', text: 'Data preprocessing pipeline completed', time: '4 hours ago' },
+            { type: 'updated', text: 'Neural network architecture updated', time: '6 hours ago' },
+            { type: 'created', text: 'Model evaluation task created', time: '1 day ago' },
+            { type: 'completed', text: 'Feature engineering completed', time: '1 day ago' }
+        ];
+        
+        activityList.innerHTML = activities.map(activity => `
+            <div class="activity-item">
+                <div class="activity-icon ${activity.type}">
+                    <i class="fas fa-${activity.type === 'created' ? 'plus' : activity.type === 'completed' ? 'check' : 'edit'}"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">${activity.text}</div>
+                    <div class="activity-time">${activity.time}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('activityCount').textContent = `${activities.length} activities`;
+    }
+    
+    // Update upcoming tasks
+    function updateUpcomingTasks() {
+        const tasksList = document.getElementById('upcomingTasks');
+        const today = new Date();
+        const upcoming = allTasks
+            .filter(task => !task.completed && task.due)
+            .sort((a, b) => new Date(a.due) - new Date(b.due))
+            .slice(0, 5);
+        
+        if (upcoming.length === 0) {
+            tasksList.innerHTML = '<div style="color: #9fb0d9; text-align: center; padding: 2rem;">No upcoming deadlines</div>';
+        } else {
+            tasksList.innerHTML = upcoming.map(task => {
+                const dueDate = new Date(task.due);
+                const isOverdue = dueDate < today;
+                const priority = task.priority === 'h' ? 'high' : task.priority === 'm' ? 'medium' : 'low';
+                
+                return `
+                    <div class="task-item">
+                        <div class="task-priority ${priority}"></div>
+                        <div class="task-content">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-due ${isOverdue ? 'overdue' : ''}">
+                                Due: ${dueDate.toLocaleDateString()}
+                                ${isOverdue ? '(Overdue)' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        document.getElementById('upcomingCount').textContent = `${upcoming.length} tasks`;
+    }
+    
+    // Export functionality
+    function exportData() {
+        const exportData = {
+            board: currentBoard,
+            metrics: {
+                total: allTasks.length,
+                completed: allTasks.filter(t => t.completed).length,
+                pending: allTasks.filter(t => !t.completed).length,
+                overdue: allTasks.filter(t => !t.completed && t.due && t.due < new Date().toISOString().slice(0, 10)).length
+            },
+            tasks: allTasks,
+            exportDate: new Date().toISOString()
+        };
+        
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ai-dashboard-${currentBoard.name || 'export'}-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    // Event listeners
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        location.reload();
+    });
+    
+    document.getElementById('exportBtn').addEventListener('click', exportData);
+    
+    document.getElementById('progressPeriod').addEventListener('change', (e) => {
+        // In a real app, you'd update the chart based on the selected period
+        console.log('Period changed to:', e.target.value);
+    });
+    
+    // Initialize dashboard
+    updateMetrics();
+    createProgressChart();
+    createPriorityChart();
+    updateActivity();
+    updateUpcomingTasks();
+    
+    // Auto-refresh every 5 minutes
+    setInterval(() => {
+        updateMetrics();
+        updateActivity();
+        updateUpcomingTasks();
+    }, 300000);
+});
+</script>
+{% endblock %}

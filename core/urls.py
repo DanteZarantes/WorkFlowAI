@@ -53,6 +53,13 @@ urlpatterns = [
     path('text-analyzer/', views.text_analyzer, name='text_analyzer'), # Text Analysis
     path('color-generator/', views.color_generator, name='color_generator'), # Color Palette
     
+    # Project Management
+    path('project-boards/', views.project_boards, name='project_boards'), # AI Project Boards
+    path('ai-tools/mindmap/', views.mindmap, name='mindmap'),    # Mind Map Tool
+    path('ai-tools/task-tree/', views.task_tree, name='task_tree'), # Task Tree Tool
+    path('ai-tools/kanban/', views.kanban, name='kanban'),       # Kanban Board
+    path('ai-tools/dashboard/', views.ai_dashboard, name='ai_dashboard'), # AI Dashboard
+    
     # User Features (requires login)
     path('analytics/', views.analytics, name='analytics'),       # Usage Analytics
     path('models/', views.models, name='models'),               # AI Models Management

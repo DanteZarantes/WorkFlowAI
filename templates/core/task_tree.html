@@ -1,0 +1,963 @@
+{% extends 'base_new.html' %}
+
+{% block title %}AI Task Tree - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="section" style="padding: 0; height: 100vh; overflow: hidden;">
+    <div class="tree-container">
+        <header class="tree-toolbar">
+            <div class="toolbar-left">
+                <a href="{% url 'project_boards' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Boards
+                </a>
+                <h1 id="boardTitle">AI Task Tree</h1>
+            </div>
+            <div class="toolbar-center">
+                <input id="searchInput" type="text" placeholder="Search tasks..." class="search-input">
+                <span id="statsDisplay" class="stats-text">0 tasks</span>
+            </div>
+            <div class="toolbar-right">
+                <div class="layout-selector">
+                    <label><input type="radio" name="layout" value="tree" checked> Tree</label>
+                    <label><input type="radio" name="layout" value="cluster"> Cluster</label>
+                    <label><input type="radio" name="layout" value="radial"> Radial</label>
+                </div>
+                <button id="addRootBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Root Task
+                </button>
+            </div>
+        </header>
+        
+        <div id="treeStage" class="tree-stage">
+            <div id="emptyState" class="empty-state">
+                <div class="empty-panel">
+                    <i class="fas fa-sitemap" style="font-size: 4rem; color: #22c55e; margin-bottom: 1rem;"></i>
+                    <h3>Create your first AI task</h3>
+                    <p>Build a hierarchical structure for your AI project tasks</p>
+                    <button id="emptyAddBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Root Task
+                    </button>
+                </div>
+            </div>
+            <svg id="treeSvg"></svg>
+        </div>
+    </div>
+</section>
+
+<!-- Task Editor Modal -->
+<div id="taskEditor" class="modal-back" style="display: none;">
+    <div class="modal">
+        <div class="modal-head">
+            <h3>Edit Task</h3>
+            <button class="x" id="editorClose">✕</button>
+        </div>
+        <div class="modal-body">
+            <label class="field">
+                <span>Task Title</span>
+                <input id="editorTitle" type="text" placeholder="e.g., Data Preprocessing Pipeline">
+            </label>
+            <label class="field">
+                <span>Description</span>
+                <textarea id="editorDesc" rows="3" placeholder="Task details and requirements..."></textarea>
+            </label>
+            <label class="field">
+                <span>Due Date</span>
+                <input id="editorDue" type="date">
+            </label>
+            <label class="field">
+                <span>Priority</span>
+                <select id="editorPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </label>
+            <label class="field">
+                <span>Status</span>
+                <select id="editorStatus">
+                    <option value="todo">To Do</option>
+                    <option value="progress" selected>In Progress</option>
+                    <option value="review">Review</option>
+                    <option value="done">Done</option>
+                </select>
+            </label>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-secondary" id="editorCancel">Cancel</button>
+            <button class="btn btn-primary" id="editorSave">Save</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.tree-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #070f1f;
+    background:
+        radial-gradient(1400px 700px at 10% -10%, #0f1a3a 0%, transparent 60%),
+        radial-gradient(1200px 600px at 90% 0%, #081532 0%, transparent 60%),
+        linear-gradient(#081226, #070f1f 60%, #070f1f);
+    background-attachment: fixed, fixed, fixed;
+}
+
+.tree-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(10,17,32,.65);
+    border-bottom: 1px solid rgba(91,140,255,.2);
+    backdrop-filter: blur(20px);
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+
+.toolbar-left, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar-center {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar-left h1 {
+    color: #e7ecf7;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.search-input {
+    padding: 8px 16px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 20px;
+    background: rgba(11,18,34,.8);
+    color: #e7ecf7;
+    width: 250px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 2px rgba(91,140,255,.2);
+}
+
+.stats-text {
+    color: #9fb0d9;
+    font-size: 0.9rem;
+}
+
+.layout-selector {
+    display: flex;
+    gap: 1rem;
+    background: rgba(91,140,255,.1);
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(91,140,255,.3);
+}
+
+.layout-selector label {
+    color: #9fb0d9;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.layout-selector input[type="radio"] {
+    margin: 0;
+}
+
+.layout-selector label:has(input:checked) {
+    color: #5b8cff;
+}
+
+.tree-stage {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+}
+
+.empty-panel {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 22px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.empty-panel h3 {
+    color: #e7ecf7;
+    margin-bottom: 1rem;
+}
+
+.empty-panel p {
+    color: #9fb0d9;
+    margin-bottom: 2rem;
+}
+
+#treeSvg {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+
+#treeSvg:active {
+    cursor: grabbing;
+}
+
+/* Tree node styles */
+.tree-node {
+    cursor: pointer;
+}
+
+.task-card {
+    fill: rgba(255,255,255,.06);
+    stroke: #5b8cff;
+    stroke-width: 2;
+    rx: 12;
+    ry: 12;
+}
+
+.task-card.status-done {
+    fill: rgba(34,197,94,.2);
+    stroke: #22c55e;
+}
+
+.task-card.status-progress {
+    fill: rgba(91,140,255,.2);
+    stroke: #5b8cff;
+}
+
+.task-card.status-review {
+    fill: rgba(245,158,11,.2);
+    stroke: #f59e0b;
+}
+
+.task-card.status-todo {
+    fill: rgba(107,114,128,.2);
+    stroke: #6b7280;
+}
+
+.task-card.priority-high {
+    stroke: #ef4444;
+    stroke-width: 3;
+}
+
+.task-card.priority-critical {
+    stroke: #dc2626;
+    stroke-width: 4;
+    stroke-dasharray: 5,5;
+}
+
+.task-title {
+    fill: #e7ecf7;
+    font-size: 12px;
+    font-weight: 600;
+    text-anchor: start;
+    dominant-baseline: middle;
+}
+
+.task-desc {
+    fill: #9fb0d9;
+    font-size: 10px;
+    text-anchor: start;
+    dominant-baseline: middle;
+}
+
+.task-due {
+    fill: #f59e0b;
+    font-size: 9px;
+    text-anchor: start;
+    dominant-baseline: middle;
+}
+
+.task-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tree-node:hover .task-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    fill: rgba(91,140,255,.2);
+    stroke: #5b8cff;
+    stroke-width: 1;
+    cursor: pointer;
+    rx: 8;
+    ry: 8;
+}
+
+.action-btn:hover {
+    fill: rgba(91,140,255,.4);
+}
+
+.action-text {
+    fill: #5b8cff;
+    font-size: 10px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    font-weight: 600;
+}
+
+.tree-link {
+    stroke: rgba(34,197,94,.6);
+    stroke-width: 2;
+    fill: none;
+}
+
+.tree-link.collapsed {
+    stroke-dasharray: 5,5;
+}
+
+.collapse-btn {
+    fill: #22c55e;
+    stroke: #16a34a;
+    stroke-width: 2;
+    cursor: pointer;
+}
+
+.collapse-btn:hover {
+    fill: #16a34a;
+}
+
+.collapse-text {
+    fill: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+}
+
+.dragging {
+    opacity: 0.8;
+}
+
+.dim {
+    opacity: 0.3;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,.06);
+    color: #5b8cff;
+    border: 1px solid rgba(91,140,255,.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(91,140,255,.1);
+    border-color: #5b8cff;
+    transform: translateY(-2px);
+}
+
+/* Modal Styles */
+.modal-back {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal {
+    background: #0b1222;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(91,140,255,.3);
+}
+
+.modal-head h3 {
+    color: #e7ecf7;
+    margin: 0;
+}
+
+.modal-head .x {
+    background: none;
+    border: none;
+    color: #9fb0d9;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.modal-head .x:hover {
+    background: rgba(91,140,255,.1);
+    color: #5b8cff;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-foot {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(91,140,255,.3);
+}
+
+.field {
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+.field span {
+    display: block;
+    color: #e7ecf7;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.field input, .field textarea, .field select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: #e7ecf7;
+    font-family: inherit;
+}
+
+.field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 2px rgba(91,140,255,.2);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get current board from session storage
+    const currentBoard = JSON.parse(sessionStorage.getItem('current_board') || '{}');
+    document.getElementById('boardTitle').textContent = currentBoard.name || 'AI Task Tree';
+    
+    const svg = d3.select('#treeSvg');
+    const stage = document.getElementById('treeStage');
+    const emptyState = document.getElementById('emptyState');
+    const searchInput = document.getElementById('searchInput');
+    const statsDisplay = document.getElementById('statsDisplay');
+    const addRootBtn = document.getElementById('addRootBtn');
+    const emptyAddBtn = document.getElementById('emptyAddBtn');
+    
+    // Editor elements
+    const editor = document.getElementById('taskEditor');
+    const editorClose = document.getElementById('editorClose');
+    const editorCancel = document.getElementById('editorCancel');
+    const editorSave = document.getElementById('editorSave');
+    const editorTitle = document.getElementById('editorTitle');
+    const editorDesc = document.getElementById('editorDesc');
+    const editorDue = document.getElementById('editorDue');
+    const editorPriority = document.getElementById('editorPriority');
+    const editorStatus = document.getElementById('editorStatus');
+    
+    let editingNodeId = null;
+    let currentLayout = 'tree';
+    
+    // Data management
+    const STORAGE_KEY = `neuralflow_tree_${currentBoard.id || 'default'}`;
+    let treeData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"nodes": []}');
+    
+    // Ensure nodes have required properties
+    treeData.nodes.forEach(node => {
+        node.children = node.children || [];
+        node.collapsed = node.collapsed || false;
+    });
+    
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(treeData));
+        updateStats();
+    }
+    
+    function updateStats() {
+        const totalTasks = countAllNodes(treeData.nodes);
+        statsDisplay.textContent = `${totalTasks} tasks`;
+        emptyState.style.display = treeData.nodes.length === 0 ? 'block' : 'none';
+    }
+    
+    function countAllNodes(nodes) {
+        let count = nodes.length;
+        nodes.forEach(node => {
+            if (node.children) {
+                count += countAllNodes(node.children);
+            }
+        });
+        return count;
+    }
+    
+    function generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+    
+    // Node management
+    function addRootTask() {
+        const newTask = {
+            id: generateId(),
+            title: '',
+            desc: '',
+            due: '',
+            priority: 'medium',
+            status: 'todo',
+            children: [],
+            collapsed: false
+        };
+        
+        treeData.nodes.push(newTask);
+        saveData();
+        buildVisualization();
+        openEditor(newTask.id);
+    }
+    
+    function addChildTask(parentId) {
+        const parent = findNode(treeData.nodes, parentId);
+        if (!parent) return;
+        
+        const newTask = {
+            id: generateId(),
+            title: '',
+            desc: '',
+            due: '',
+            priority: 'medium',
+            status: 'todo',
+            children: [],
+            collapsed: false
+        };
+        
+        parent.children.push(newTask);
+        saveData();
+        buildVisualization();
+        openEditor(newTask.id);
+    }
+    
+    function deleteTask(nodeId) {
+        if (confirm('Delete this task and all its subtasks?')) {
+            treeData.nodes = removeNodeFromTree(treeData.nodes, nodeId);
+            saveData();
+            buildVisualization();
+        }
+    }
+    
+    function findNode(nodes, id) {
+        for (const node of nodes) {
+            if (node.id === id) return node;
+            if (node.children) {
+                const found = findNode(node.children, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+    
+    function removeNodeFromTree(nodes, id) {
+        return nodes.filter(node => {
+            if (node.id === id) return false;
+            if (node.children) {
+                node.children = removeNodeFromTree(node.children, id);
+            }
+            return true;
+        });
+    }
+    
+    function toggleCollapse(nodeId) {
+        const node = findNode(treeData.nodes, nodeId);
+        if (node) {
+            node.collapsed = !node.collapsed;
+            saveData();
+            buildVisualization();
+        }
+    }
+    
+    function updateTask(nodeId, data) {
+        const node = findNode(treeData.nodes, nodeId);
+        if (node) {
+            Object.assign(node, data);
+            saveData();
+            buildVisualization();
+        }
+    }
+    
+    // Editor functions
+    function openEditor(nodeId) {
+        const node = findNode(treeData.nodes, nodeId);
+        if (!node) return;
+        
+        editingNodeId = nodeId;
+        editorTitle.value = node.title || '';
+        editorDesc.value = node.desc || '';
+        editorDue.value = node.due || '';
+        editorPriority.value = node.priority || 'medium';
+        editorStatus.value = node.status || 'todo';
+        
+        editor.style.display = 'flex';
+        editorTitle.focus();
+    }
+    
+    function closeEditor() {
+        editor.style.display = 'none';
+        editingNodeId = null;
+    }
+    
+    function saveEditor() {
+        if (!editingNodeId) return;
+        
+        const title = editorTitle.value.trim() || 'Untitled Task';
+        const desc = editorDesc.value.trim();
+        const due = editorDue.value;
+        const priority = editorPriority.value;
+        const status = editorStatus.value;
+        
+        updateTask(editingNodeId, { title, desc, due, priority, status });
+        closeEditor();
+    }
+    
+    // D3 visualization
+    function buildVisualization() {
+        svg.selectAll('*').remove();
+        
+        if (treeData.nodes.length === 0) {
+            updateStats();
+            return;
+        }
+        
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        
+        // Create zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.3, 3])
+            .on('zoom', (event) => {
+                svg.select('.tree-group').attr('transform', event.transform);
+            });
+        
+        svg.call(zoom);
+        
+        const treeGroup = svg.append('g').attr('class', 'tree-group');
+        
+        // Process each root node
+        treeData.nodes.forEach((rootNode, index) => {
+            const hierarchy = d3.hierarchy(rootNode, d => d.collapsed ? [] : d.children);
+            
+            let treeLayout;
+            if (currentLayout === 'cluster') {
+                treeLayout = d3.cluster().size([height - 100, width - 200]);
+            } else if (currentLayout === 'radial') {
+                treeLayout = d3.tree()
+                    .size([2 * Math.PI, Math.min(width, height) / 2 - 100])
+                    .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
+            } else {
+                treeLayout = d3.tree().size([height - 100, width - 200]);
+            }
+            
+            treeLayout(hierarchy);
+            
+            // Adjust positions for multiple roots
+            const offsetX = currentLayout === 'radial' ? width / 2 : 100;
+            const offsetY = currentLayout === 'radial' ? height / 2 : 50 + index * (height / treeData.nodes.length);
+            
+            hierarchy.descendants().forEach(d => {
+                if (currentLayout === 'radial') {
+                    const angle = d.x;
+                    const radius = d.y;
+                    d.x = offsetX + radius * Math.cos(angle - Math.PI / 2);
+                    d.y = offsetY + radius * Math.sin(angle - Math.PI / 2);
+                } else {
+                    const tempX = d.x;
+                    d.x = d.y + offsetX;
+                    d.y = tempX + offsetY;
+                }
+            });
+            
+            renderTree(treeGroup, hierarchy);
+        });
+        
+        updateStats();
+    }
+    
+    function renderTree(container, hierarchy) {
+        // Render links
+        const links = hierarchy.links();
+        
+        container.selectAll('.tree-link')
+            .data(links, d => d.target.data.id)
+            .join('path')
+            .attr('class', 'tree-link')
+            .attr('d', d => {
+                return `M${d.source.x},${d.source.y}C${d.source.x},${(d.source.y + d.target.y) / 2} ${d.target.x},${(d.source.y + d.target.y) / 2} ${d.target.x},${d.target.y}`;
+            });
+        
+        // Render nodes
+        const nodes = hierarchy.descendants();
+        
+        const nodeGroups = container.selectAll('.tree-node')
+            .data(nodes, d => d.data.id)
+            .join('g')
+            .attr('class', 'tree-node')
+            .attr('transform', d => `translate(${d.x},${d.y})`);
+        
+        // Task cards
+        nodeGroups.selectAll('.task-card').remove();
+        nodeGroups.append('rect')
+            .attr('class', d => `task-card status-${d.data.status} priority-${d.data.priority}`)
+            .attr('width', 200)
+            .attr('height', 60)
+            .attr('x', -100)
+            .attr('y', -30);
+        
+        // Task titles
+        nodeGroups.selectAll('.task-title').remove();
+        nodeGroups.append('text')
+            .attr('class', 'task-title')
+            .attr('x', -90)
+            .attr('y', -10)
+            .text(d => d.data.title || 'Untitled Task')
+            .on('dblclick', (event, d) => openEditor(d.data.id));
+        
+        // Task descriptions
+        nodeGroups.selectAll('.task-desc').remove();
+        nodeGroups.append('text')
+            .attr('class', 'task-desc')
+            .attr('x', -90)
+            .attr('y', 5)
+            .text(d => d.data.desc ? (d.data.desc.length > 25 ? d.data.desc.substring(0, 25) + '...' : d.data.desc) : '');
+        
+        // Due dates
+        nodeGroups.selectAll('.task-due').remove();
+        nodeGroups.append('text')
+            .attr('class', 'task-due')
+            .attr('x', -90)
+            .attr('y', 20)
+            .text(d => d.data.due ? `Due: ${d.data.due}` : '');
+        
+        // Action buttons
+        const actionsGroup = nodeGroups.selectAll('.task-actions').data([1])
+            .join('g')
+            .attr('class', 'task-actions')
+            .attr('transform', 'translate(70, -20)');
+        
+        // Add child button
+        const addChildGroup = actionsGroup.selectAll('.add-child').data([1])
+            .join('g')
+            .attr('class', 'add-child')
+            .style('cursor', 'pointer')
+            .on('click', (event, d) => {
+                event.stopPropagation();
+                const nodeData = d3.select(event.currentTarget.parentNode.parentNode).datum();
+                addChildTask(nodeData.data.id);
+            });
+        
+        addChildGroup.selectAll('rect').remove();
+        addChildGroup.append('rect')
+            .attr('class', 'action-btn')
+            .attr('width', 20)
+            .attr('height', 15)
+            .attr('x', -10)
+            .attr('y', -7.5);
+        
+        addChildGroup.selectAll('text').remove();
+        addChildGroup.append('text')
+            .attr('class', 'action-text')
+            .text('+');
+        
+        // Edit button
+        const editGroup = actionsGroup.selectAll('.edit-task').data([1])
+            .join('g')
+            .attr('class', 'edit-task')
+            .attr('transform', 'translate(0, 20)')
+            .style('cursor', 'pointer')
+            .on('click', (event, d) => {
+                event.stopPropagation();
+                const nodeData = d3.select(event.currentTarget.parentNode.parentNode).datum();
+                openEditor(nodeData.data.id);
+            });
+        
+        editGroup.selectAll('rect').remove();
+        editGroup.append('rect')
+            .attr('class', 'action-btn')
+            .attr('width', 20)
+            .attr('height', 15)
+            .attr('x', -10)
+            .attr('y', -7.5);
+        
+        editGroup.selectAll('text').remove();
+        editGroup.append('text')
+            .attr('class', 'action-text')
+            .text('✎');
+        
+        // Delete button
+        const deleteGroup = actionsGroup.selectAll('.delete-task').data([1])
+            .join('g')
+            .attr('class', 'delete-task')
+            .attr('transform', 'translate(0, 40)')
+            .style('cursor', 'pointer')
+            .on('click', (event, d) => {
+                event.stopPropagation();
+                const nodeData = d3.select(event.currentTarget.parentNode.parentNode).datum();
+                deleteTask(nodeData.data.id);
+            });
+        
+        deleteGroup.selectAll('rect').remove();
+        deleteGroup.append('rect')
+            .attr('class', 'action-btn')
+            .attr('width', 20)
+            .attr('height', 15)
+            .attr('x', -10)
+            .attr('y', -7.5);
+        
+        deleteGroup.selectAll('text').remove();
+        deleteGroup.append('text')
+            .attr('class', 'action-text')
+            .text('🗑');
+        
+        // Collapse/expand buttons for nodes with children
+        nodeGroups.filter(d => d.data.children && d.data.children.length > 0)
+            .selectAll('.collapse-btn-group').data([1])
+            .join('g')
+            .attr('class', 'collapse-btn-group')
+            .attr('transform', 'translate(105, 0)')
+            .style('cursor', 'pointer')
+            .on('click', (event, d) => {
+                event.stopPropagation();
+                toggleCollapse(d.data.id);
+            })
+            .each(function(d) {
+                const group = d3.select(this);
+                group.selectAll('*').remove();
+                
+                group.append('circle')
+                    .attr('class', 'collapse-btn')
+                    .attr('r', 10);
+                
+                group.append('text')
+                    .attr('class', 'collapse-text')
+                    .text(d.data.collapsed ? '+' : '−');
+            });
+    }
+    
+    // Search functionality
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        
+        svg.selectAll('.tree-node')
+            .classed('dim', function(d) {
+                if (!query) return false;
+                return !d.data.title.toLowerCase().includes(query) && 
+                       !d.data.desc.toLowerCase().includes(query);
+            });
+    }
+    
+    // Event listeners
+    addRootBtn.addEventListener('click', addRootTask);
+    emptyAddBtn.addEventListener('click', addRootTask);
+    
+    editorClose.addEventListener('click', closeEditor);
+    editorCancel.addEventListener('click', closeEditor);
+    editorSave.addEventListener('click', saveEditor);
+    
+    editor.addEventListener('click', (e) => {
+        if (e.target === editor) closeEditor();
+    });
+    
+    searchInput.addEventListener('input', performSearch);
+    
+    // Layout change handler
+    document.querySelectorAll('input[name="layout"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            currentLayout = e.target.value;
+            buildVisualization();
+        });
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && editor.style.display === 'flex') {
+            closeEditor();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && editor.style.display === 'flex') {
+            saveEditor();
+        }
+    });
+    
+    // Window resize handler
+    window.addEventListener('resize', () => {
+        setTimeout(buildVisualization, 100);
+    });
+    
+    // Initialize
+    buildVisualization();
+});
+</script>
+{% endblock %}

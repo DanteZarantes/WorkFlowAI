@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
 import Features from '../components/Features'
+import ParticlesBackground from '../components/ParticlesBackground'
 
 export default function Home() {
   const [user, setUser] = useState(null)
@@ -18,6 +19,7 @@ export default function Home() {
 
   return (
     <main>
+      <ParticlesBackground />
       <Navbar user={user} />
       <Hero />
       <Features />

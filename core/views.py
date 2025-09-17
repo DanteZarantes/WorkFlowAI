@@ -94,3 +94,19 @@ def user_directory(request):
 
 def theme_settings(request):
     return render(request, 'core/theme_settings.html')
+
+# Project Management Views
+def project_boards(request):
+    return render(request, 'core/project_boards.html')
+
+def mindmap(request):
+    return render(request, 'core/mindmap.html')
+
+def task_tree(request):
+    return render(request, 'core/task_tree.html')
+
+def kanban(request):
+    return render(request, 'core/kanban.html')
+
+def ai_dashboard(request):
+    return render(request, 'core/ai_dashboard.html')

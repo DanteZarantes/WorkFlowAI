@@ -174,7 +174,72 @@
             gap: 15px;
         }
         
-        .contact-toggle {
+        /* PERFORMANCE WIDGET */
+        .performance-widget {
+            position: fixed;
+            bottom: 110px;
+            left: 30px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .performance-content {
+            background: rgba(11,18,34,.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(91,140,255,.3);
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            order: 1;
+        }
+        
+        .performance-widget.active .performance-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .performance-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #5b8cff;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+        
+        .performance-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-label {
+            color: #9fb0d9;
+            font-size: 0.8rem;
+        }
+        
+        .stat-value {
+            color: #e7ecf7;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .contact-toggle, .performance-toggle {
             width: 60px;
             height: 60px;
             background: linear-gradient(135deg, #5b8cff, #764ba2);
@@ -188,12 +253,12 @@
             order: 2;
         }
         
-        .contact-toggle:hover {
+        .contact-toggle:hover, .performance-toggle:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 35px rgba(91,140,255,.6);
         }
         
-        .contact-toggle i {
+        .contact-toggle i, .performance-toggle i {
             color: white;
             font-size: 1.5rem;
         }
@@ -750,7 +815,6 @@
                 </div>
             </div>
             <div class="nav-center">
-                <a href="{% url 'home' %}" class="nav-link">Home</a>
                 
                 <div class="dropdown">
                     <a href="{% url 'about' %}" class="nav-link">Company <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
@@ -772,6 +836,19 @@
                         <a href="{% url 'analytics' %}"><i class="fas fa-chart-line"></i> Analytics</a>
                         <a href="{% url 'computer_vision' %}"><i class="fas fa-eye"></i> Computer Vision</a>
                         <a href="{% url 'ai_visualization' %}"><i class="fas fa-cube"></i> 3D Visualization</a>
+                        <a href="{% url 'project_boards' %}"><i class="fas fa-project-diagram"></i> Project Boards</a>
+                    </div>
+                </div>
+                
+                <div class="dropdown">
+                    <a href="#" class="nav-link">Tools <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'calculator' %}"><i class="fas fa-calculator"></i> Cost Calculator</a>
+                        <a href="{% url 'text_analyzer' %}"><i class="fas fa-file-alt"></i> Text Analyzer</a>
+                        <a href="{% url 'color_generator' %}"><i class="fas fa-palette"></i> Color Generator</a>
+                        <a href="{% url 'project_boards' %}"><i class="fas fa-project-diagram"></i> Project Boards</a>
+                        <a href="{% url 'mindmap' %}"><i class="fas fa-brain"></i> Mind Maps</a>
+                        <a href="{% url 'task_tree' %}"><i class="fas fa-sitemap"></i> Task Trees</a>
                     </div>
                 </div>
                 
@@ -787,6 +864,7 @@
                 </div>
                 
                 <a href="{% url 'pricing' %}" class="nav-link">Pricing</a>
+                <a href="{% url 'project_boards' %}" class="nav-link">Boards</a>
                 
                 {% if user.is_authenticated %}
                 <div class="dropdown">
@@ -841,7 +919,6 @@
         <div class="sidebar-nav">
             <div class="sidebar-section">
                 <div class="sidebar-title">Main</div>
-                <a href="{% url 'home' %}" class="sidebar-link"><i class="fas fa-home"></i>Home</a>
                 <a href="{% url 'about' %}" class="sidebar-link"><i class="fas fa-info-circle"></i>About</a>
                 <a href="{% url 'services' %}" class="sidebar-link"><i class="fas fa-robot"></i>Services</a>
                 <a href="{% url 'pricing' %}" class="sidebar-link"><i class="fas fa-tags"></i>Pricing</a>
@@ -855,6 +932,13 @@
                 <a href="{% url 'color_generator' %}" class="sidebar-link"><i class="fas fa-palette"></i>Color Generator</a>
                 <a href="{% url 'chatbots' %}" class="sidebar-link"><i class="fas fa-comments"></i>Chatbots</a>
                 <a href="{% url 'computer_vision' %}" class="sidebar-link"><i class="fas fa-eye"></i>Computer Vision</a>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Project Management</div>
+                <a href="{% url 'project_boards' %}" class="sidebar-link"><i class="fas fa-project-diagram"></i>Project Boards</a>
+                <a href="{% url 'mindmap' %}" class="sidebar-link"><i class="fas fa-brain"></i>Mind Maps</a>
+                <a href="{% url 'task_tree' %}" class="sidebar-link"><i class="fas fa-sitemap"></i>Task Trees</a>
             </div>
             
             <div class="sidebar-section">
@@ -902,6 +986,33 @@
         </div>
     </div>
 
+    <!-- Performance/Caching Widget -->
+    <div class="performance-widget" id="performanceWidget">
+        <div class="performance-content">
+            <div class="performance-header">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Performance</span>
+            </div>
+            <div class="performance-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Cache Hit</span>
+                    <span class="stat-value" id="cacheHit">98.5%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Load Time</span>
+                    <span class="stat-value" id="loadTime">1.2s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Memory</span>
+                    <span class="stat-value" id="memoryUsage">45MB</span>
+                </div>
+            </div>
+        </div>
+        <div class="performance-toggle" onclick="togglePerformance()">
+            <i class="fas fa-chart-line"></i>
+        </div>
+    </div>
+
     <script>
         // Contact widget toggle only
         function toggleContact() {
@@ -945,15 +1056,43 @@
             const widget = document.getElementById('contactWidget');
             widget.classList.toggle('active');
         }
+        
+        // Performance widget toggle
+        function togglePerformance() {
+            const widget = document.getElementById('performanceWidget');
+            widget.classList.toggle('active');
+            
+            // Update stats when opened
+            if (widget.classList.contains('active')) {
+                updatePerformanceStats();
+            }
+        }
+        
+        // Update performance statistics
+        function updatePerformanceStats() {
+            // Simulate cache hit rate
+            const cacheHit = (95 + Math.random() * 5).toFixed(1);
+            document.getElementById('cacheHit').textContent = cacheHit + '%';
+            
+            // Calculate load time
+            const loadTime = (performance.now() / 1000).toFixed(1);
+            document.getElementById('loadTime').textContent = loadTime + 's';
+            
+            // Memory usage (if available)
+            if ('memory' in performance) {
+                const memory = (performance.memory.usedJSHeapSize / 1048576).toFixed(0);
+                document.getElementById('memoryUsage').textContent = memory + 'MB';
+            }
+        }
     </script>
 
     <main>
         {% block content %}{% endblock %}
     </main>
     
-    <!-- Interactive Features Scripts - Temporarily disabled for login testing -->
-    <!-- <script src="{% static 'js/interactive-features.js' %}"></script> -->
-    <!-- <script src="{% static 'js/react-components.js' %}"></script> -->
-    <!-- <script src="{% static 'js/api-playground.js' %}"></script> -->
+    <!-- Interactive Features Scripts -->
+    <script src="{% static 'js/interactive-features.js' %}"></script>
+    <script src="{% static 'js/react-components.js' %}"></script>
+    <script src="{% static 'js/api-playground.js' %}"></script>
 </body>
 </html>

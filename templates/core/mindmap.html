@@ -1,0 +1,796 @@
+{% extends 'base_new.html' %}
+
+{% block title %}AI Mind Map - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="section" style="padding: 0; height: 100vh; overflow: hidden;">
+    <div class="mindmap-container">
+        <header class="mindmap-toolbar">
+            <div class="toolbar-left">
+                <a href="{% url 'project_boards' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Boards
+                </a>
+                <h1 id="boardTitle">AI Mind Map</h1>
+            </div>
+            <div class="toolbar-center">
+                <input id="searchInput" type="text" placeholder="Search topics..." class="search-input">
+                <span id="statsDisplay" class="stats-text">0 topics</span>
+            </div>
+            <div class="toolbar-right">
+                <button id="addTopicBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Topic
+                </button>
+            </div>
+        </header>
+        
+        <div id="mindmapStage" class="mindmap-stage">
+            <div id="emptyState" class="empty-state">
+                <div class="empty-panel">
+                    <i class="fas fa-brain" style="font-size: 4rem; color: #5b8cff; margin-bottom: 1rem;"></i>
+                    <h3>Create your first AI topic</h3>
+                    <p>Start building your AI project mind map by adding a root topic</p>
+                    <button id="emptyAddBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Topic
+                    </button>
+                </div>
+            </div>
+            <svg id="mindmapSvg"></svg>
+        </div>
+    </div>
+</section>
+
+<!-- Topic Editor Modal -->
+<div id="topicEditor" class="modal-back" style="display: none;">
+    <div class="modal">
+        <div class="modal-head">
+            <h3>Edit Topic</h3>
+            <button class="x" id="editorClose">✕</button>
+        </div>
+        <div class="modal-body">
+            <label class="field">
+                <span>Title</span>
+                <input id="editorTitle" type="text" placeholder="e.g., Neural Network Architecture">
+            </label>
+            <label class="field">
+                <span>Description</span>
+                <textarea id="editorDesc" rows="3" placeholder="Detailed description..."></textarea>
+            </label>
+            <label class="field">
+                <span>Priority</span>
+                <select id="editorPriority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                </select>
+            </label>
+            <label class="field">
+                <span>Status</span>
+                <select id="editorStatus">
+                    <option value="planning">Planning</option>
+                    <option value="progress" selected>In Progress</option>
+                    <option value="review">Review</option>
+                    <option value="done">Done</option>
+                </select>
+            </label>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-secondary" id="editorCancel">Cancel</button>
+            <button class="btn btn-primary" id="editorSave">Save</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.mindmap-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #070f1f;
+    background:
+        radial-gradient(1400px 700px at 10% -10%, #0f1a3a 0%, transparent 60%),
+        radial-gradient(1200px 600px at 90% 0%, #081532 0%, transparent 60%),
+        linear-gradient(#081226, #070f1f 60%, #070f1f);
+    background-attachment: fixed, fixed, fixed;
+}
+
+.mindmap-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(10,17,32,.65);
+    border-bottom: 1px solid rgba(91,140,255,.2);
+    backdrop-filter: blur(20px);
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+}
+
+.toolbar-left, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar-center {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar-left h1 {
+    color: #e7ecf7;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.search-input {
+    padding: 8px 16px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 20px;
+    background: rgba(11,18,34,.8);
+    color: #e7ecf7;
+    width: 250px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 2px rgba(91,140,255,.2);
+}
+
+.stats-text {
+    color: #9fb0d9;
+    font-size: 0.9rem;
+}
+
+.mindmap-stage {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+}
+
+.empty-panel {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 22px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.empty-panel h3 {
+    color: #e7ecf7;
+    margin-bottom: 1rem;
+}
+
+.empty-panel p {
+    color: #9fb0d9;
+    margin-bottom: 2rem;
+}
+
+#mindmapSvg {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+
+#mindmapSvg:active {
+    cursor: grabbing;
+}
+
+/* Node styles */
+.mindmap-node {
+    cursor: pointer;
+}
+
+.node-card {
+    fill: rgba(255,255,255,.06);
+    stroke: #5b8cff;
+    stroke-width: 2;
+    rx: 16;
+    ry: 16;
+}
+
+.node-card.status-done {
+    stroke: #22c55e;
+    fill: rgba(34,197,94,.1);
+}
+
+.node-card.status-review {
+    stroke: #f59e0b;
+    fill: rgba(245,158,11,.1);
+}
+
+.node-card.priority-high {
+    stroke: #ef4444;
+}
+
+.node-card.priority-critical {
+    stroke: #dc2626;
+    stroke-width: 3;
+}
+
+.node-title {
+    fill: #e7ecf7;
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.node-desc {
+    fill: #9fb0d9;
+    font-size: 11px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.node-actions {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mindmap-node:hover .node-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    fill: rgba(91,140,255,.2);
+    stroke: #5b8cff;
+    stroke-width: 1;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    fill: rgba(91,140,255,.4);
+}
+
+.action-icon {
+    fill: #5b8cff;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+}
+
+.mindmap-link {
+    stroke: rgba(91,140,255,.6);
+    stroke-width: 2;
+    fill: none;
+}
+
+.mindmap-link-shadow {
+    stroke: rgba(0,0,0,.3);
+    stroke-width: 4;
+    fill: none;
+}
+
+.dragging {
+    opacity: 0.8;
+}
+
+.dim {
+    opacity: 0.3;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,.06);
+    color: #5b8cff;
+    border: 1px solid rgba(91,140,255,.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(91,140,255,.1);
+    border-color: #5b8cff;
+    transform: translateY(-2px);
+}
+
+/* Modal Styles */
+.modal-back {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal {
+    background: #0b1222;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(91,140,255,.3);
+}
+
+.modal-head h3 {
+    color: #e7ecf7;
+    margin: 0;
+}
+
+.modal-head .x {
+    background: none;
+    border: none;
+    color: #9fb0d9;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.modal-head .x:hover {
+    background: rgba(91,140,255,.1);
+    color: #5b8cff;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-foot {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(91,140,255,.3);
+}
+
+.field {
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+.field span {
+    display: block;
+    color: #e7ecf7;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.field input, .field textarea, .field select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: #e7ecf7;
+    font-family: inherit;
+}
+
+.field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 2px rgba(91,140,255,.2);
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get current board from session storage
+    const currentBoard = JSON.parse(sessionStorage.getItem('current_board') || '{}');
+    document.getElementById('boardTitle').textContent = currentBoard.name || 'AI Mind Map';
+    
+    const svg = d3.select('#mindmapSvg');
+    const stage = document.getElementById('mindmapStage');
+    const emptyState = document.getElementById('emptyState');
+    const searchInput = document.getElementById('searchInput');
+    const statsDisplay = document.getElementById('statsDisplay');
+    const addTopicBtn = document.getElementById('addTopicBtn');
+    const emptyAddBtn = document.getElementById('emptyAddBtn');
+    
+    // Editor elements
+    const editor = document.getElementById('topicEditor');
+    const editorClose = document.getElementById('editorClose');
+    const editorCancel = document.getElementById('editorCancel');
+    const editorSave = document.getElementById('editorSave');
+    const editorTitle = document.getElementById('editorTitle');
+    const editorDesc = document.getElementById('editorDesc');
+    const editorPriority = document.getElementById('editorPriority');
+    const editorStatus = document.getElementById('editorStatus');
+    
+    let editingNodeId = null;
+    let simulation = null;
+    
+    // Data management
+    const STORAGE_KEY = `neuralflow_mindmap_${currentBoard.id || 'default'}`;
+    let mindmapData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"nodes": [], "links": []}');
+    
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(mindmapData));
+        updateStats();
+    }
+    
+    function updateStats() {
+        statsDisplay.textContent = `${mindmapData.nodes.length} topics`;
+        emptyState.style.display = mindmapData.nodes.length === 0 ? 'block' : 'none';
+    }
+    
+    function generateId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+    
+    // Node management
+    function addNode(parentId = null) {
+        const newNode = {
+            id: generateId(),
+            title: '',
+            desc: '',
+            priority: 'medium',
+            status: 'planning',
+            x: stage.clientWidth / 2 + (Math.random() - 0.5) * 200,
+            y: stage.clientHeight / 2 + (Math.random() - 0.5) * 200,
+            fx: null,
+            fy: null
+        };
+        
+        mindmapData.nodes.push(newNode);
+        
+        if (parentId) {
+            mindmapData.links.push({
+                source: parentId,
+                target: newNode.id
+            });
+        }
+        
+        saveData();
+        buildVisualization();
+        openEditor(newNode.id);
+    }
+    
+    function deleteNode(nodeId) {
+        if (confirm('Delete this topic and all its connections?')) {
+            mindmapData.nodes = mindmapData.nodes.filter(n => n.id !== nodeId);
+            mindmapData.links = mindmapData.links.filter(l => 
+                l.source !== nodeId && l.target !== nodeId && 
+                (typeof l.source === 'object' ? l.source.id !== nodeId : true) &&
+                (typeof l.target === 'object' ? l.target.id !== nodeId : true)
+            );
+            saveData();
+            buildVisualization();
+        }
+    }
+    
+    function updateNode(nodeId, data) {
+        const node = mindmapData.nodes.find(n => n.id === nodeId);
+        if (node) {
+            Object.assign(node, data);
+            saveData();
+            renderNodes();
+        }
+    }
+    
+    // Editor functions
+    function openEditor(nodeId) {
+        const node = mindmapData.nodes.find(n => n.id === nodeId);
+        if (!node) return;
+        
+        editingNodeId = nodeId;
+        editorTitle.value = node.title || '';
+        editorDesc.value = node.desc || '';
+        editorPriority.value = node.priority || 'medium';
+        editorStatus.value = node.status || 'planning';
+        
+        editor.style.display = 'flex';
+        editorTitle.focus();
+    }
+    
+    function closeEditor() {
+        editor.style.display = 'none';
+        editingNodeId = null;
+    }
+    
+    function saveEditor() {
+        if (!editingNodeId) return;
+        
+        const title = editorTitle.value.trim() || 'Untitled Topic';
+        const desc = editorDesc.value.trim();
+        const priority = editorPriority.value;
+        const status = editorStatus.value;
+        
+        updateNode(editingNodeId, { title, desc, priority, status });
+        closeEditor();
+    }
+    
+    // D3 visualization
+    function buildVisualization() {
+        if (simulation) simulation.stop();
+        
+        svg.selectAll('*').remove();
+        
+        if (mindmapData.nodes.length === 0) {
+            updateStats();
+            return;
+        }
+        
+        const width = stage.clientWidth;
+        const height = stage.clientHeight;
+        
+        // Create groups
+        const linkGroup = svg.append('g').attr('class', 'links');
+        const nodeGroup = svg.append('g').attr('class', 'nodes');
+        
+        // Setup simulation
+        simulation = d3.forceSimulation(mindmapData.nodes)
+            .force('link', d3.forceLink(mindmapData.links).id(d => d.id).distance(150))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(80))
+            .on('tick', ticked);
+        
+        // Zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.3, 3])
+            .on('zoom', (event) => {
+                nodeGroup.attr('transform', event.transform);
+                linkGroup.attr('transform', event.transform);
+            });
+        
+        svg.call(zoom);
+        
+        renderLinks();
+        renderNodes();
+        updateStats();
+    }
+    
+    function renderLinks() {
+        const linkGroup = svg.select('.links');
+        
+        const links = linkGroup.selectAll('.mindmap-link')
+            .data(mindmapData.links, d => `${d.source.id || d.source}-${d.target.id || d.target}`);
+        
+        links.exit().remove();
+        
+        links.enter()
+            .append('path')
+            .attr('class', 'mindmap-link')
+            .merge(links);
+    }
+    
+    function renderNodes() {
+        const nodeGroup = svg.select('.nodes');
+        
+        const nodes = nodeGroup.selectAll('.mindmap-node')
+            .data(mindmapData.nodes, d => d.id);
+        
+        nodes.exit().remove();
+        
+        const nodeEnter = nodes.enter()
+            .append('g')
+            .attr('class', 'mindmap-node')
+            .call(d3.drag()
+                .on('start', dragStarted)
+                .on('drag', dragged)
+                .on('end', dragEnded));
+        
+        // Node background
+        nodeEnter.append('rect')
+            .attr('class', 'node-card')
+            .attr('width', 160)
+            .attr('height', 80)
+            .attr('x', -80)
+            .attr('y', -40);
+        
+        // Node title
+        nodeEnter.append('text')
+            .attr('class', 'node-title')
+            .attr('y', -10)
+            .on('dblclick', (event, d) => openEditor(d.id));
+        
+        // Node description
+        nodeEnter.append('text')
+            .attr('class', 'node-desc')
+            .attr('y', 10);
+        
+        // Action buttons group
+        const actionsGroup = nodeEnter.append('g')
+            .attr('class', 'node-actions')
+            .attr('transform', 'translate(60, -30)');
+        
+        // Add child button
+        const addBtn = actionsGroup.append('g')
+            .attr('transform', 'translate(0, 0)')
+            .style('cursor', 'pointer')
+            .on('click', (event, d) => {
+                event.stopPropagation();
+                addNode(d.id);
+            });
+        
+        addBtn.append('circle')
+            .attr('class', 'action-btn')
+            .attr('r', 12);
+        
+        addBtn.append('text')
+            .attr('class', 'action-icon')
+            .text('+');
+        
+        // Edit button
+        const editBtn = actionsGroup.append('g')
+            .attr('transform', 'translate(0, 25)')
+            .style('cursor', 'pointer')
+            .on('click', (event, d) => {
+                event.stopPropagation();
+                openEditor(d.id);
+            });
+        
+        editBtn.append('circle')
+            .attr('class', 'action-btn')
+            .attr('r', 12);
+        
+        editBtn.append('text')
+            .attr('class', 'action-icon')
+            .text('✎');
+        
+        // Delete button
+        const deleteBtn = actionsGroup.append('g')
+            .attr('transform', 'translate(0, 50)')
+            .style('cursor', 'pointer')
+            .on('click', (event, d) => {
+                event.stopPropagation();
+                deleteNode(d.id);
+            });
+        
+        deleteBtn.append('circle')
+            .attr('class', 'action-btn')
+            .attr('r', 12);
+        
+        deleteBtn.append('text')
+            .attr('class', 'action-icon')
+            .text('🗑');
+        
+        // Update existing nodes
+        const nodeUpdate = nodeEnter.merge(nodes);
+        
+        nodeUpdate.select('.node-card')
+            .attr('class', d => `node-card status-${d.status} priority-${d.priority}`);
+        
+        nodeUpdate.select('.node-title')
+            .text(d => d.title || 'Untitled Topic');
+        
+        nodeUpdate.select('.node-desc')
+            .text(d => d.desc ? (d.desc.length > 20 ? d.desc.substring(0, 20) + '...' : d.desc) : '');
+    }
+    
+    function ticked() {
+        svg.selectAll('.mindmap-link')
+            .attr('d', d => {
+                const dx = d.target.x - d.source.x;
+                const dy = d.target.y - d.source.y;
+                const dr = Math.sqrt(dx * dx + dy * dy) * 0.3;
+                return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+            });
+        
+        svg.selectAll('.mindmap-node')
+            .attr('transform', d => `translate(${d.x},${d.y})`);
+    }
+    
+    // Drag functions
+    function dragStarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+        d3.select(this).classed('dragging', true);
+    }
+    
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
+    
+    function dragEnded(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d3.select(this).classed('dragging', false);
+        saveData();
+    }
+    
+    // Search functionality
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        
+        svg.selectAll('.mindmap-node')
+            .classed('dim', d => {
+                if (!query) return false;
+                return !d.title.toLowerCase().includes(query) && 
+                       !d.desc.toLowerCase().includes(query);
+            });
+    }
+    
+    // Event listeners
+    addTopicBtn.addEventListener('click', () => addNode());
+    emptyAddBtn.addEventListener('click', () => addNode());
+    
+    editorClose.addEventListener('click', closeEditor);
+    editorCancel.addEventListener('click', closeEditor);
+    editorSave.addEventListener('click', saveEditor);
+    
+    editor.addEventListener('click', (e) => {
+        if (e.target === editor) closeEditor();
+    });
+    
+    searchInput.addEventListener('input', performSearch);
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && editor.style.display === 'flex') {
+            closeEditor();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && editor.style.display === 'flex') {
+            saveEditor();
+        }
+    });
+    
+    // Window resize handler
+    window.addEventListener('resize', () => {
+        if (simulation) {
+            const width = stage.clientWidth;
+            const height = stage.clientHeight;
+            simulation.force('center', d3.forceCenter(width / 2, height / 2));
+            simulation.alpha(0.3).restart();
+        }
+    });
+    
+    // Initialize
+    buildVisualization();
+});
+</script>
+{% endblock %}

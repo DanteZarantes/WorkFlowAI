@@ -1,0 +1,933 @@
+{% extends 'base_new.html' %}
+
+{% block title %}AI Kanban Board - NeuralFlow{% endblock %}
+
+{% block content %}
+<section class="section" style="padding: 0; min-height: 100vh;">
+    <div id="toasts"></div>
+    
+    <div class="kanban-container">
+        <header class="kanban-toolbar">
+            <div class="toolbar-left">
+                <a href="{% url 'project_boards' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Boards
+                </a>
+                <h1 id="boardTitle">AI Kanban Board</h1>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-secondary" id="reset">
+                    <i class="fas fa-refresh"></i> Reset
+                </button>
+            </div>
+        </header>
+        
+        <div class="composer-bar">
+            <input class="input" id="cText" placeholder="New AI task…" aria-label="Task text">
+            <select class="select" id="cPri" aria-label="Priority">
+                <option value="h">High</option>
+                <option value="m" selected>Medium</option>
+                <option value="l">Low</option>
+            </select>
+            <div class="fake-date" id="cDate" data-value="" role="button" aria-haspopup="dialog" aria-expanded="false">
+                <span id="cDateLabel">Pick deadline…</span><span class="muted">▾</span>
+            </div>
+            <button class="btn btn-primary" id="cAdd">Add Task</button>
+        </div>
+
+        <div class="kanban-grid" aria-live="polite">
+            <div class="lane" data-col="overdue">
+                <h3>Overdue <span class="count">0</span></h3>
+                <div class="list"></div>
+            </div>
+            <div class="lane" data-col="today">
+                <h3>Today <span class="count">0</span></h3>
+                <div class="list"></div>
+            </div>
+            <div class="lane" data-col="upcoming">
+                <h3>Upcoming <span class="count">0</span></h3>
+                <div class="list"></div>
+            </div>
+            <div class="lane" data-col="done">
+                <h3>Done <span class="count">0</span></h3>
+                <div class="list"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Calendar Modal -->
+<div class="modal-back" id="dateModal" role="dialog" aria-modal="true" aria-labelledby="calTitle">
+    <div class="modal">
+        <div class="cal-head">
+            <button class="btn small" id="prevM" aria-label="Previous month">←</button>
+            <div id="calTitle"></div>
+            <button class="btn small" id="nextM" aria-label="Next month">→</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-foot">
+            <button class="btn small" id="okBtn">Set</button>
+            <button class="btn small" id="cancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Trash Button -->
+<button class="fab" id="trashBtn" aria-label="Trash (deleted tasks)">
+    🗑
+    <span class="badge" id="trashBadge">0</span>
+</button>
+
+<!-- Trash Modal -->
+<div class="modal-back" id="trashModal" role="dialog" aria-modal="true" aria-labelledby="trashTitle">
+    <div class="modal trash-modal">
+        <div class="trash-head">
+            <div id="trashTitle">Deleted Tasks</div>
+            <button class="icon-x" id="trashClose" aria-label="Close">✕</button>
+        </div>
+        <div class="trash-list" id="trashList"></div>
+        <div class="trash-foot">
+            <button class="btn small" id="trashEmpty">Empty Trash</button>
+            <button class="btn small" id="trashClose2">Close</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.kanban-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #070f1f;
+    background:
+        radial-gradient(1400px 700px at 10% -10%, #0f1a3a 0%, transparent 60%),
+        radial-gradient(1200px 600px at 90% 0%, #081532 0%, transparent 60%),
+        linear-gradient(#081226, #070f1f 60%, #070f1f);
+    background-attachment: fixed, fixed, fixed;
+}
+
+.kanban-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(10,17,32,.65);
+    border-bottom: 1px solid rgba(91,140,255,.2);
+    backdrop-filter: blur(20px);
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    flex-shrink: 0;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toolbar-left h1 {
+    color: #e7ecf7;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.composer-bar {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(91,140,255,.1);
+    align-items: center;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.input, .select {
+    padding: 10px 16px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: #e7ecf7;
+    font-family: inherit;
+}
+
+.input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.select {
+    min-width: 120px;
+}
+
+.fake-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: #e7ecf7;
+    cursor: pointer;
+    min-width: 160px;
+}
+
+.fake-date:hover {
+    background: rgba(255,255,255,.08);
+    border-color: #5b8cff;
+}
+
+.muted {
+    color: #9fb0d9;
+}
+
+.kanban-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    flex: 1;
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+.lane {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(91,140,255,.2);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+    max-height: 70vh;
+    min-width: 280px;
+}
+
+.lane h3 {
+    color: #e7ecf7;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.count {
+    background: rgba(91,140,255,.2);
+    color: #5b8cff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: calc(70vh - 120px);
+    padding-right: 4px;
+}
+
+.task {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: grab;
+    transition: all 0.3s ease;
+}
+
+.task:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(91,140,255,.2);
+}
+
+.task.drag {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.task-title {
+    color: #e7ecf7;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.pill {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.pill.h {
+    background: rgba(239,68,68,.2);
+    color: #ef4444;
+}
+
+.pill.m {
+    background: rgba(245,158,11,.2);
+    color: #f59e0b;
+}
+
+.pill.l {
+    background: rgba(34,197,94,.2);
+    color: #22c55e;
+}
+
+.meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #9fb0d9;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: #9fb0d9;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.icon-btn:hover {
+    background: rgba(91,140,255,.1);
+    color: #5b8cff;
+}
+
+.icon-done:hover {
+    color: #22c55e;
+}
+
+.icon-del:hover {
+    color: #ef4444;
+}
+
+.lane.drop {
+    background: rgba(91,140,255,.1);
+    border-color: #5b8cff;
+}
+
+.lane[data-col="overdue"] {
+    border-color: rgba(239,68,68,.3);
+}
+
+.lane[data-col="today"] {
+    border-color: rgba(245,158,11,.3);
+}
+
+.lane[data-col="upcoming"] {
+    border-color: rgba(34,197,94,.3);
+}
+
+.lane[data-col="done"] {
+    border-color: rgba(91,140,255,.3);
+}
+
+/* Toast Notifications */
+#toasts {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    animation: slideIn 0.3s ease;
+}
+
+.toast.ok {
+    background: #22c55e;
+}
+
+.toast.err {
+    background: #ef4444;
+}
+
+.toast.info {
+    background: #5b8cff;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Calendar Modal */
+.modal-back {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal {
+    background: #0b1222;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.cal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(91,140,255,.1);
+    color: #e7ecf7;
+    font-weight: 600;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: rgba(91,140,255,.1);
+    padding: 1px;
+}
+
+.cal-wd, .cal-day {
+    padding: 8px;
+    text-align: center;
+    background: #0b1222;
+    color: #e7ecf7;
+}
+
+.cal-wd {
+    font-weight: 600;
+    color: #9fb0d9;
+    font-size: 0.8rem;
+}
+
+.cal-day {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cal-day:hover {
+    background: rgba(91,140,255,.2);
+}
+
+.cal-day.sel {
+    background: #5b8cff;
+    color: white;
+}
+
+.cal-day.out {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.cal-foot {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 1rem;
+}
+
+/* Floating Action Button */
+.fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.fab:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(91,140,255,.6);
+}
+
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Trash Modal */
+.trash-modal {
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+}
+
+.trash-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(91,140,255,.3);
+    color: #e7ecf7;
+    font-weight: 600;
+}
+
+.icon-x {
+    background: none;
+    border: none;
+    color: #9fb0d9;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.icon-x:hover {
+    background: rgba(91,140,255,.1);
+    color: #5b8cff;
+}
+
+.trash-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.trash-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(91,140,255,.2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.trash-foot {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 1rem;
+    border-top: 1px solid rgba(91,140,255,.3);
+}
+
+/* Button Styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,.06);
+    color: #5b8cff;
+    border: 1px solid rgba(91,140,255,.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(91,140,255,.1);
+    border-color: #5b8cff;
+}
+
+.btn.small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .kanban-grid {
+        grid-template-columns: 1fr;
+        overflow-x: hidden;
+        padding: 0.5rem;
+    }
+    
+    .kanban-toolbar {
+        padding: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .toolbar-left {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .composer-bar {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .input, .select, .fake-date {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .lane {
+        min-width: auto;
+        max-height: 60vh;
+    }
+    
+    .list {
+        max-height: calc(60vh - 120px);
+    }
+    
+    .fab {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get current board from session storage
+    const currentBoard = JSON.parse(sessionStorage.getItem('current_board') || '{}');
+    document.getElementById('boardTitle').textContent = currentBoard.name || 'AI Kanban Board';
+    
+    // Utils
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const uid = () => Math.floor(Math.random() * 1e9);
+    const todayISO = () => new Date().toISOString().slice(0, 10);
+    const fmtHuman = iso => new Date(iso).toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'});
+    const toasts = $('#toasts');
+    const toast = (m, t = 'info') => {
+        if (!toasts) return;
+        const d = document.createElement('div');
+        d.className = 'toast ' + t;
+        d.textContent = m;
+        toasts.appendChild(d);
+        setTimeout(() => d.remove(), 3500);
+    };
+    const escapeHtml = s => String(s).replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m]));
+
+    // Storage
+    const KEY = `neuralflow-kanban-${currentBoard.id || 'default'}`;
+    const KEY_TRASH = `neuralflow-kanban-trash-${currentBoard.id || 'default'}`;
+    let tasks = [], trash = [];
+    try { tasks = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { tasks = []; }
+    try { trash = JSON.parse(localStorage.getItem(KEY_TRASH) || '[]'); } catch { trash = []; }
+    const save = () => localStorage.setItem(KEY, JSON.stringify(tasks));
+    const saveTrash = () => localStorage.setItem(KEY_TRASH, JSON.stringify(trash));
+
+    // Logic
+    function deriveCol(t) {
+        if (t.done) return 'done';
+        if (!t.due) return 'upcoming';
+        const td = todayISO();
+        if (t.due < td) return 'overdue';
+        if (t.due === td) return 'today';
+        return 'upcoming';
+    }
+    const priMap = {h: 'High', m: 'Medium', l: 'Low'};
+    const priScore = p => ({h: 0, m: 1, l: 2}[p] ?? 3);
+
+    // Render board
+    function render() {
+        const groups = {overdue: [], today: [], upcoming: [], done: []};
+        tasks.forEach(t => groups[deriveCol(t)].push(t));
+        const sortFn = (a, b) => {
+            const p = priScore(a.pri) - priScore(b.pri);
+            if (p) return p;
+            const da = (a.due || ''), db = (b.due || '');
+            if (da !== db) return da.localeCompare(db);
+            return a.text.localeCompare(b.text);
+        };
+        Object.keys(groups).forEach(k => groups[k].sort(sortFn));
+
+        $$('.lane').forEach(l => {
+            const col = l.dataset.col, list = $('.list', l);
+            list.innerHTML = '';
+            groups[col].forEach(t => {
+                const el = document.createElement('div');
+                el.className = `task ${col}`;
+                el.dataset.id = t.id;
+                el.draggable = true;
+                el.innerHTML = `
+                    <div class="task-title">
+                        ${t.done ? '✔ ' : ''}${escapeHtml(t.text)}
+                        <span class="pill ${t.pri}" data-act="pri">${priMap[t.pri]}</span>
+                    </div>
+                    <div class="meta">
+                        <span class="muted">Due: ${t.due ? fmtHuman(t.due) : '—'}</span>
+                        <div>
+                            ${col !== 'done'
+                                ? '<button class="icon-btn icon-done" data-act="done" title="Mark done">✓</button>'
+                                : '<button class="icon-btn icon-undo" data-act="undone" title="Undo">↺</button>'}
+                            <button class="icon-btn icon-del" data-act="del" title="Delete">✕</button>
+                        </div>
+                    </div>
+                `;
+                el.addEventListener('click', e => {
+                    const act = e.target?.dataset?.act;
+                    if (!act) return;
+                    if (act === 'done') { t.done = true; save(); render(); toast('Task completed', 'ok'); }
+                    if (act === 'undone') { t.done = false; save(); render(); toast('Task reopened', 'info'); }
+                    if (act === 'del') {
+                        trash.unshift({...t, deletedAt: new Date().toISOString()});
+                        tasks = tasks.filter(x => x.id !== t.id);
+                        save(); saveTrash(); render(); renderTrashBadge();
+                        toast('Moved to Trash', 'err');
+                    }
+                    if (act === 'pri') { t.pri = t.pri === 'h' ? 'm' : t.pri === 'm' ? 'l' : 'h'; save(); render(); }
+                });
+                el.addEventListener('dragstart', () => { el.classList.add('drag'); });
+                el.addEventListener('dragend', () => { el.classList.remove('drag'); });
+                list.appendChild(el);
+            });
+            $('.count', l).textContent = groups[col].length;
+        });
+    }
+
+    // Drag & drop between lanes
+    $$('.lane').forEach(l => {
+        l.addEventListener('dragover', e => {
+            e.preventDefault();
+            l.classList.add('drop');
+        });
+        l.addEventListener('dragleave', () => l.classList.remove('drop'));
+        l.addEventListener('drop', e => {
+            e.preventDefault();
+            l.classList.remove('drop');
+            const dragging = document.querySelector('.task.drag');
+            if (!dragging) return;
+            const id = +dragging.dataset.id;
+            const t = tasks.find(x => x.id === id);
+            if (!t) return;
+            const col = l.dataset.col;
+            const d = new Date();
+            if (col === 'done') {
+                t.done = true;
+            } else {
+                t.done = false;
+                if (col === 'today') t.due = todayISO();
+                if (col === 'upcoming') { d.setDate(d.getDate() + 1); t.due = d.toISOString().slice(0, 10); }
+                if (col === 'overdue') { d.setDate(d.getDate() - 1); t.due = d.toISOString().slice(0, 10); }
+            }
+            save(); render();
+        });
+    });
+
+    // Composer
+    const cText = $('#cText'), cPri = $('#cPri'), cDate = $('#cDate'), cDateLabel = $('#cDateLabel'), cAdd = $('#cAdd');
+    let compDue = null;
+    const setCompDue = iso => {
+        compDue = iso;
+        cDate.dataset.value = iso || '';
+        cDate.setAttribute('aria-expanded', 'false');
+        cDateLabel.textContent = iso ? fmtHuman(iso) : 'Pick deadline…';
+    };
+    cAdd.addEventListener('click', () => {
+        const text = (cText.value || '').trim();
+        if (!text) { toast('Enter task', 'err'); cText.focus(); return; }
+        const due = compDue || todayISO();
+        const lc = text.toLowerCase();
+        if (tasks.some(x => !x.done && (x.text || '').toLowerCase() === lc && (x.due || todayISO()) === due)) {
+            toast('This task already exists', 'err'); return;
+        }
+        tasks.unshift({id: uid(), text, pri: cPri.value, due, done: false});
+        save(); render();
+        cText.value = ''; cPri.value = 'm'; setCompDue(null);
+        toast('Task added', 'ok');
+    });
+    cText.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); cAdd.click(); }
+    });
+
+    // Calendar
+    const modal = $('#dateModal'), calGrid = $('#calGrid'), calTitle = $('#calTitle');
+    let selISO = null, viewY = 0, viewM = 0, pickCb = null;
+    const wd = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
+    function drawCal() {
+        calGrid.innerHTML = '';
+        wd.forEach(w => {
+            const d = document.createElement('div'); d.className = 'cal-wd'; d.textContent = w; calGrid.appendChild(d);
+        });
+        const first = new Date(viewY, viewM, 1),
+              start = (first.getDay() + 6) % 7,
+              days = new Date(viewY, viewM + 1, 0).getDate();
+        calTitle.textContent = first.toLocaleString('en-GB', {month: 'long', year: 'numeric'});
+        for (let i = 0; i < start; i++) { const f = document.createElement('div'); f.className = 'cal-day out'; f.textContent = ''; calGrid.appendChild(f); }
+        for (let d = 1; d <= days; d++) {
+            const iso = new Date(viewY, viewM, d).toISOString().slice(0, 10);
+            const el = document.createElement('div'); el.className = 'cal-day'; el.textContent = d;
+            if (iso === selISO) el.classList.add('sel');
+            el.onclick = () => { selISO = iso; drawCal(); };
+            calGrid.appendChild(el);
+        }
+    }
+    function openPicker({initial, onSelect}) {
+        selISO = initial;
+        const dt = new Date(initial);
+        viewY = dt.getFullYear(); viewM = dt.getMonth();
+        pickCb = onSelect; drawCal();
+        modal.style.display = 'flex';
+        cDate.setAttribute('aria-expanded', 'true');
+    }
+    function closePicker() {
+        modal.style.display = 'none';
+        cDate.setAttribute('aria-expanded', 'false');
+    }
+    $('#prevM').onclick = () => { viewM--; if (viewM < 0) { viewM = 11; viewY--; } drawCal(); };
+    $('#nextM').onclick = () => { viewM++; if (viewM > 11) { viewM = 0; viewY++; } drawCal(); };
+    $('#okBtn').onclick = () => { if (pickCb) pickCb(selISO || todayISO()); closePicker(); };
+    $('#cancelBtn').onclick = closePicker;
+    modal.addEventListener('click', e => { if (e.target === modal) closePicker(); });
+    cDate.addEventListener('click', () => openPicker({
+        initial: compDue || todayISO(),
+        onSelect: iso => setCompDue(iso)
+    }));
+
+    // Trash
+    const trashBtn = $('#trashBtn');
+    const trashBadge = $('#trashBadge');
+    const trashModal = $('#trashModal');
+    const trashList = $('#trashList');
+    const trashClose = $('#trashClose');
+    const trashClose2 = $('#trashClose2');
+    const trashEmpty = $('#trashEmpty');
+
+    function renderTrashBadge() { trashBadge.textContent = String(trash.length); }
+
+    function renderTrashModal() {
+        trashList.innerHTML = '';
+        if (trash.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'muted';
+            empty.style.padding = '6px 2px';
+            empty.textContent = 'Trash is empty';
+            trashList.appendChild(empty);
+            return;
+        }
+        trash.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'trash-item';
+            row.innerHTML = `
+                <div>
+                    <div class="task-title" style="font-size:1rem">${escapeHtml(item.text)}</div>
+                    <div class="meta">
+                        <span class="pill ${item.pri}">${priMap[item.pri] || ''}</span>
+                        <span class="muted">Due: ${item.due ? fmtHuman(item.due) : '—'}</span>
+                        <span class="muted">Deleted: ${fmtHuman(item.deletedAt.slice(0, 10))}</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:6px">
+                    <button class="btn small" data-act="restore">Restore</button>
+                    <button class="btn small" data-act="purge">Delete forever</button>
+                </div>
+            `;
+            row.querySelector('[data-act="restore"]').onclick = () => {
+                const idx = trash.findIndex(x => x.id === item.id);
+                if (idx > -1) { tasks.unshift(trash[idx]); trash.splice(idx, 1); save(); saveTrash(); render(); renderTrashBadge(); renderTrashModal(); toast('Task restored', 'ok'); }
+            };
+            row.querySelector('[data-act="purge"]').onclick = () => {
+                trash = trash.filter(x => x.id !== item.id);
+                saveTrash(); renderTrashBadge(); renderTrashModal(); toast('Deleted forever', 'err');
+            };
+            trashList.appendChild(row);
+        });
+    }
+
+    function openTrash() {
+        renderTrashModal();
+        trashModal.style.display = 'flex';
+    }
+    function closeTrash() { trashModal.style.display = 'none'; }
+
+    trashBtn.addEventListener('click', openTrash);
+    trashClose.addEventListener('click', closeTrash);
+    trashClose2.addEventListener('click', closeTrash);
+    trashModal.addEventListener('click', e => { if (e.target === trashModal) closeTrash(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && trashModal.style.display === 'flex') closeTrash(); });
+
+    trashEmpty.addEventListener('click', () => {
+        if (trash.length === 0) return;
+        if (confirm('Delete all items in Trash permanently?')) {
+            trash = [];
+            saveTrash(); renderTrashBadge(); renderTrashModal(); toast('Trash emptied', 'err');
+        }
+    });
+
+    // Reset
+    $('#reset').addEventListener('click', () => {
+        if (confirm('Clear all tasks from this board?')) {
+            tasks = []; save(); render(); toast('Board cleared', 'info');
+        }
+    });
+
+    // Initialize
+    render();
+    renderTrashBadge();
+});
+</script>
+{% endblock %}
