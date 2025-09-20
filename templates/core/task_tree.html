@@ -1,6 +1,6 @@
 {% extends 'base_new.html' %}
 
-{% block title %}AI Task Tree - NeuralFlow{% endblock %}
+{% block title %}Task Tree - NeuralFlow{% endblock %}
 
 {% block content %}
 <section class="section" style="padding: 0; height: 100vh; overflow: hidden;">
@@ -10,7 +10,7 @@
                 <a href="{% url 'project_boards' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Boards
                 </a>
-                <h1 id="boardTitle">AI Task Tree</h1>
+                <h1 id="boardTitle">Task Tree</h1>
             </div>
             <div class="toolbar-center">
                 <input id="searchInput" type="text" placeholder="Search tasks..." class="search-input">
@@ -32,8 +32,8 @@
             <div id="emptyState" class="empty-state">
                 <div class="empty-panel">
                     <i class="fas fa-sitemap" style="font-size: 4rem; color: #22c55e; margin-bottom: 1rem;"></i>
-                    <h3>Create your first AI task</h3>
-                    <p>Build a hierarchical structure for your AI project tasks</p>
+                    <h3>Create your first task</h3>
+                    <p>Build a hierarchical structure for your project tasks</p>
                     <button id="emptyAddBtn" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Add Root Task
                     </button>
@@ -54,7 +54,7 @@
         <div class="modal-body">
             <label class="field">
                 <span>Task Title</span>
-                <input id="editorTitle" type="text" placeholder="e.g., Data Preprocessing Pipeline">
+                <input id="editorTitle" type="text" placeholder="e.g., Project Setup">
             </label>
             <label class="field">
                 <span>Description</span>
@@ -62,25 +62,33 @@
             </label>
             <label class="field">
                 <span>Due Date</span>
-                <input id="editorDue" type="date">
+                <div class="fake-date" id="editorDue" data-value="" role="button" aria-haspopup="dialog" aria-expanded="false">
+                    <span id="dueDateLabel">📅 Pick deadline…</span><span class="muted">▾</span>
+                </div>
             </label>
             <label class="field">
                 <span>Priority</span>
-                <select id="editorPriority">
-                    <option value="low">Low</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                </select>
+                <div class="custom-select-wrapper">
+                    <select id="editorPriority">
+                        <option value="low">🟢 Low Priority</option>
+                        <option value="medium" selected>🟡 Medium Priority</option>
+                        <option value="high">🔴 High Priority</option>
+                        <option value="critical">🚨 Critical Priority</option>
+                    </select>
+                    <div class="select-arrow">▼</div>
+                </div>
             </label>
             <label class="field">
                 <span>Status</span>
-                <select id="editorStatus">
-                    <option value="todo">To Do</option>
-                    <option value="progress" selected>In Progress</option>
-                    <option value="review">Review</option>
-                    <option value="done">Done</option>
-                </select>
+                <div class="custom-select-wrapper">
+                    <select id="editorStatus">
+                        <option value="todo">📋 To Do</option>
+                        <option value="progress" selected>⚡ In Progress</option>
+                        <option value="review">👀 Review</option>
+                        <option value="done">✅ Done</option>
+                    </select>
+                    <div class="select-arrow">▼</div>
+                </div>
             </label>
         </div>
         <div class="modal-foot">
@@ -90,7 +98,28 @@
     </div>
 </div>
 
+<!-- Calendar Modal -->
+<div class="modal-back" id="dateModal" role="dialog" aria-modal="true" aria-labelledby="calTitle">
+    <div class="modal">
+        <div class="cal-head">
+            <button class="btn small" id="prevM" aria-label="Previous month">←</button>
+            <div id="calTitle"></div>
+            <button class="btn small" id="nextM" aria-label="Next month">→</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-foot">
+            <button class="btn small" id="okBtn">Set</button>
+            <button class="btn small" id="cancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <style>
+html, body {
+    overflow: hidden !important;
+    height: 100vh;
+}
+
 .tree-container {
     height: 100vh;
     display: flex;
@@ -101,6 +130,7 @@
         radial-gradient(1200px 600px at 90% 0%, #081532 0%, transparent 60%),
         linear-gradient(#081226, #070f1f 60%, #070f1f);
     background-attachment: fixed, fixed, fixed;
+    overflow: hidden;
 }
 
 .tree-toolbar {
@@ -183,6 +213,8 @@
     flex: 1;
     position: relative;
     overflow: hidden;
+    height: calc(100vh - 80px);
+    max-height: calc(100vh - 80px);
 }
 
 .empty-state {
@@ -217,6 +249,7 @@
     width: 100%;
     height: 100%;
     cursor: grab;
+    overflow: hidden;
 }
 
 #treeSvg:active {
@@ -242,18 +275,45 @@
 }
 
 .task-card.status-progress {
-    fill: rgba(91,140,255,.2);
-    stroke: #5b8cff;
+    fill: rgba(245,158,11,.2);
+    stroke: #f59e0b;
+    stroke-dasharray: 5,5;
+    animation: progressPulse 2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% { stroke-opacity: 0.8; }
+    50% { stroke-opacity: 1; }
 }
 
 .task-card.status-review {
-    fill: rgba(245,158,11,.2);
-    stroke: #f59e0b;
+    fill: rgba(91,140,255,.2);
+    stroke: #5b8cff;
 }
 
 .task-card.status-todo {
     fill: rgba(107,114,128,.2);
     stroke: #6b7280;
+}
+
+.status-indicator {
+    r: 8;
+}
+
+.status-indicator.status-done {
+    fill: #22c55e;
+}
+
+.status-indicator.status-progress {
+    fill: #f59e0b;
+}
+
+.status-indicator.status-review {
+    fill: #5b8cff;
+}
+
+.status-indicator.status-todo {
+    fill: #6b7280;
 }
 
 .task-card.priority-high {
@@ -264,7 +324,13 @@
 .task-card.priority-critical {
     stroke: #dc2626;
     stroke-width: 4;
-    stroke-dasharray: 5,5;
+    stroke-dasharray: 3,3;
+    animation: criticalBlink 1s ease-in-out infinite;
+}
+
+@keyframes criticalBlink {
+    0%, 100% { stroke-opacity: 0.7; }
+    50% { stroke-opacity: 1; }
 }
 
 .task-title {
@@ -289,6 +355,17 @@
     dominant-baseline: middle;
 }
 
+.task-due.overdue {
+    fill: #ef4444;
+    font-weight: bold;
+    animation: overdueBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes overdueBlink {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
 .task-actions {
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -309,6 +386,11 @@
 
 .action-btn:hover {
     fill: rgba(91,140,255,.4);
+    transform: scale(1.1);
+}
+
+.action-btn {
+    transition: all 0.2s ease;
 }
 
 .action-text {
@@ -321,13 +403,29 @@
 }
 
 .tree-link {
-    stroke: rgba(34,197,94,.6);
     stroke-width: 2;
     fill: none;
 }
 
+.tree-link.status-done {
+    stroke: #22c55e;
+}
+
+.tree-link.status-progress {
+    stroke: #f59e0b;
+}
+
+.tree-link.status-review {
+    stroke: #5b8cff;
+}
+
+.tree-link.status-todo {
+    stroke: #6b7280;
+}
+
 .tree-link.collapsed {
-    stroke-dasharray: 5,5;
+    stroke-dasharray: 8,4;
+    opacity: 0.6;
 }
 
 .collapse-btn {
@@ -339,6 +437,96 @@
 
 .collapse-btn:hover {
     fill: #16a34a;
+    transform: scale(1.1);
+}
+
+.collapse-btn {
+    transition: all 0.2s ease;
+}
+
+.fake-date {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: #e7ecf7;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.fake-date:hover {
+    background: rgba(255,255,255,.08);
+    border-color: #5b8cff;
+}
+
+.muted {
+    color: #9fb0d9;
+}
+
+.cal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(91,140,255,.1);
+    color: #e7ecf7;
+    font-weight: 600;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: rgba(91,140,255,.1);
+    padding: 1px;
+}
+
+.cal-wd, .cal-day {
+    padding: 8px;
+    text-align: center;
+    background: #0b1222;
+    color: #e7ecf7;
+}
+
+.cal-wd {
+    font-weight: 600;
+    color: #9fb0d9;
+    font-size: 0.8rem;
+}
+
+.cal-day {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cal-day:hover {
+    background: rgba(91,140,255,.2);
+}
+
+.cal-day.sel {
+    background: #5b8cff;
+    color: white;
+}
+
+.cal-day.out {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.cal-foot {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 1rem;
+}
+
+.btn.small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
 }
 
 .collapse-text {
@@ -492,10 +680,47 @@
     font-family: inherit;
 }
 
+.field select option {
+    background: #0b1222;
+    color: #e7ecf7;
+    padding: 8px 12px;
+}
+
 .field input:focus, .field textarea:focus, .field select:focus {
     outline: none;
     border-color: #5b8cff;
     box-shadow: 0 0 0 2px rgba(91,140,255,.2);
+}
+
+.custom-select-wrapper {
+    position: relative;
+}
+
+.custom-select-wrapper select {
+    appearance: none;
+    background: rgba(255,255,255,.08);
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.custom-select-wrapper select option {
+    background: #0b1222;
+    color: #e7ecf7;
+    padding: 8px 12px;
+}
+
+.custom-select-wrapper .select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9fb0d9;
+    pointer-events: none;
+    font-size: 0.8rem;
+}
+
+.custom-select-wrapper select:focus + .select-arrow {
+    color: #5b8cff;
 }
 </style>
 
@@ -504,7 +729,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Get current board from session storage
     const currentBoard = JSON.parse(sessionStorage.getItem('current_board') || '{}');
-    document.getElementById('boardTitle').textContent = currentBoard.name || 'AI Task Tree';
+    document.getElementById('boardTitle').textContent = currentBoard.name || 'Task Tree';
     
     const svg = d3.select('#treeSvg');
     const stage = document.getElementById('treeStage');
@@ -522,10 +747,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const editorTitle = document.getElementById('editorTitle');
     const editorDesc = document.getElementById('editorDesc');
     const editorDue = document.getElementById('editorDue');
+    const dueDateLabel = document.getElementById('dueDateLabel');
+    const dateModal = document.getElementById('dateModal');
+    const calGrid = document.getElementById('calGrid');
+    const calTitle = document.getElementById('calTitle');
+    
+    let selectedDate = null;
+    let viewYear = new Date().getFullYear();
+    let viewMonth = new Date().getMonth();
+    const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
     const editorPriority = document.getElementById('editorPriority');
     const editorStatus = document.getElementById('editorStatus');
     
     let editingNodeId = null;
+    let pendingParentId = null;
     let currentLayout = 'tree';
     
     // Data management
@@ -546,7 +781,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateStats() {
         const totalTasks = countAllNodes(treeData.nodes);
         statsDisplay.textContent = `${totalTasks} tasks`;
-        emptyState.style.display = treeData.nodes.length === 0 ? 'block' : 'none';
+        
+        if (treeData.nodes.length === 0) {
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+        }
     }
     
     function countAllNodes(nodes) {
@@ -583,32 +823,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function addChildTask(parentId) {
-        const parent = findNode(treeData.nodes, parentId);
+        pendingParentId = parentId;
+        openEditor(null);
+    }
+    
+    function createChildTask() {
+        if (!pendingParentId) return;
+        
+        const parent = findNode(treeData.nodes, pendingParentId);
         if (!parent) return;
+        
+        const title = editorTitle.value.trim() || 'Untitled Task';
+        const desc = editorDesc.value.trim();
+        const due = editorDue.dataset.value;
+        const priority = editorPriority.value;
+        const status = editorStatus.value;
         
         const newTask = {
             id: generateId(),
-            title: '',
-            desc: '',
-            due: '',
-            priority: 'medium',
-            status: 'todo',
+            title,
+            desc,
+            due,
+            priority,
+            status,
             children: [],
             collapsed: false
         };
         
         parent.children.push(newTask);
+        pendingParentId = null;
         saveData();
         buildVisualization();
-        openEditor(newTask.id);
+        closeEditor();
     }
     
     function deleteTask(nodeId) {
-        if (confirm('Delete this task and all its subtasks?')) {
-            treeData.nodes = removeNodeFromTree(treeData.nodes, nodeId);
-            saveData();
-            buildVisualization();
-        }
+        treeData.nodes = removeNodeFromTree(treeData.nodes, nodeId);
+        saveData();
+        buildVisualization();
     }
     
     function findNode(nodes, id) {
@@ -651,45 +903,65 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Editor functions
+    function setDueDate(iso) {
+        selectedDate = iso;
+        editorDue.dataset.value = iso || '';
+        dueDateLabel.textContent = iso ? `📅 ${new Date(iso).toLocaleDateString('en-GB', {day: '2-digit', month: 'short', year: 'numeric'})}` : '📅 Pick deadline…';
+    }
+    
     function openEditor(nodeId) {
-        const node = findNode(treeData.nodes, nodeId);
-        if (!node) return;
-        
-        editingNodeId = nodeId;
-        editorTitle.value = node.title || '';
-        editorDesc.value = node.desc || '';
-        editorDue.value = node.due || '';
-        editorPriority.value = node.priority || 'medium';
-        editorStatus.value = node.status || 'todo';
+        if (nodeId) {
+            const node = findNode(treeData.nodes, nodeId);
+            if (!node) return;
+            
+            editingNodeId = nodeId;
+            editorTitle.value = node.title || '';
+            editorDesc.value = node.desc || '';
+            setDueDate(node.due || '');
+            editorPriority.value = node.priority || 'medium';
+            editorStatus.value = node.status || 'todo';
+        } else {
+            editingNodeId = null;
+            editorTitle.value = '';
+            editorDesc.value = '';
+            setDueDate('');
+            editorPriority.value = 'medium';
+            editorStatus.value = 'todo';
+        }
         
         editor.style.display = 'flex';
-        editorTitle.focus();
+        setTimeout(() => {
+            editorTitle.focus();
+        }, 50);
     }
     
     function closeEditor() {
         editor.style.display = 'none';
         editingNodeId = null;
+        pendingParentId = null;
     }
     
     function saveEditor() {
-        if (!editingNodeId) return;
-        
-        const title = editorTitle.value.trim() || 'Untitled Task';
-        const desc = editorDesc.value.trim();
-        const due = editorDue.value;
-        const priority = editorPriority.value;
-        const status = editorStatus.value;
-        
-        updateTask(editingNodeId, { title, desc, due, priority, status });
-        closeEditor();
+        if (pendingParentId) {
+            createChildTask();
+        } else if (editingNodeId) {
+            const title = editorTitle.value.trim() || 'Untitled Task';
+            const desc = editorDesc.value.trim();
+            const due = editorDue.dataset.value;
+            const priority = editorPriority.value;
+            const status = editorStatus.value;
+            
+            updateTask(editingNodeId, { title, desc, due, priority, status });
+            closeEditor();
+        }
     }
     
     // D3 visualization
     function buildVisualization() {
         svg.selectAll('*').remove();
+        updateStats();
         
         if (treeData.nodes.length === 0) {
-            updateStats();
             return;
         }
         
@@ -716,8 +988,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 treeLayout = d3.cluster().size([height - 100, width - 200]);
             } else if (currentLayout === 'radial') {
                 treeLayout = d3.tree()
-                    .size([2 * Math.PI, Math.min(width, height) / 2 - 100])
-                    .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
+                    .size([2 * Math.PI, Math.min(width, height) / 2 - 200])
+                    .separation((a, b) => (a.parent == b.parent ? 3 : 5) / Math.max(a.depth, 1));
             } else {
                 treeLayout = d3.tree().size([height - 100, width - 200]);
             }
@@ -731,7 +1003,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hierarchy.descendants().forEach(d => {
                 if (currentLayout === 'radial') {
                     const angle = d.x;
-                    const radius = d.y;
+                    const radius = d.y + (d.depth * 80);
                     d.x = offsetX + radius * Math.cos(angle - Math.PI / 2);
                     d.y = offsetY + radius * Math.sin(angle - Math.PI / 2);
                 } else {
@@ -754,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', function() {
         container.selectAll('.tree-link')
             .data(links, d => d.target.data.id)
             .join('path')
-            .attr('class', 'tree-link')
+            .attr('class', d => `tree-link status-${d.target.data.status}`)
             .attr('d', d => {
                 return `M${d.source.x},${d.source.y}C${d.source.x},${(d.source.y + d.target.y) / 2} ${d.target.x},${(d.source.y + d.target.y) / 2} ${d.target.x},${d.target.y}`;
             });
@@ -766,6 +1038,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .data(nodes, d => d.data.id)
             .join('g')
             .attr('class', 'tree-node')
+            .attr('data-id', d => d.data.id)
             .attr('transform', d => `translate(${d.x},${d.y})`);
         
         // Task cards
@@ -777,11 +1050,37 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('x', -100)
             .attr('y', -30);
         
+        // Status indicators
+        nodeGroups.selectAll('.status-indicator').remove();
+        nodeGroups.append('circle')
+            .attr('class', d => `status-indicator status-${d.data.status}`)
+            .attr('cx', -85)
+            .attr('cy', 20)
+            .style('cursor', 'pointer')
+            .on('click', function(event, d) {
+                event.stopPropagation();
+                const currentStatus = d.data.status;
+                const newStatus = currentStatus === 'done' ? 'todo' : 'done';
+                updateTask(d.data.id, { status: newStatus });
+            });
+        
+        // Priority emojis
+        nodeGroups.selectAll('.priority-emoji').remove();
+        nodeGroups.append('text')
+            .attr('class', 'priority-emoji')
+            .attr('x', -90)
+            .attr('y', -10)
+            .attr('font-size', '14px')
+            .text(d => {
+                const priorityEmojis = { low: '🟢', medium: '🟡', high: '🔴', critical: '🚨' };
+                return priorityEmojis[d.data.priority] || '🟡';
+            });
+        
         // Task titles
         nodeGroups.selectAll('.task-title').remove();
         nodeGroups.append('text')
             .attr('class', 'task-title')
-            .attr('x', -90)
+            .attr('x', -70)
             .attr('y', -10)
             .text(d => d.data.title || 'Untitled Task')
             .on('dblclick', (event, d) => openEditor(d.data.id));
@@ -792,15 +1091,24 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('class', 'task-desc')
             .attr('x', -90)
             .attr('y', 5)
-            .text(d => d.data.desc ? (d.data.desc.length > 25 ? d.data.desc.substring(0, 25) + '...' : d.data.desc) : '');
+            .text(d => d.data.desc ? (d.data.desc.length > 30 ? d.data.desc.substring(0, 30) + '...' : d.data.desc) : '');
         
         // Due dates
         nodeGroups.selectAll('.task-due').remove();
         nodeGroups.append('text')
-            .attr('class', 'task-due')
+            .attr('class', d => {
+                if (!d.data.due) return 'task-due';
+                const today = new Date().toISOString().split('T')[0];
+                return d.data.due < today ? 'task-due overdue' : 'task-due';
+            })
             .attr('x', -90)
             .attr('y', 20)
-            .text(d => d.data.due ? `Due: ${d.data.due}` : '');
+            .text(d => {
+                if (!d.data.due) return '';
+                const today = new Date().toISOString().split('T')[0];
+                const isOverdue = d.data.due < today;
+                return isOverdue ? `⚠️ Overdue: ${d.data.due}` : `📅 Due: ${d.data.due}`;
+            });
         
         // Action buttons
         const actionsGroup = nodeGroups.selectAll('.task-actions').data([1])
@@ -812,12 +1120,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const addChildGroup = actionsGroup.selectAll('.add-child').data([1])
             .join('g')
             .attr('class', 'add-child')
-            .style('cursor', 'pointer')
-            .on('click', (event, d) => {
-                event.stopPropagation();
-                const nodeData = d3.select(event.currentTarget.parentNode.parentNode).datum();
-                addChildTask(nodeData.data.id);
-            });
+            .style('cursor', 'pointer');
+            
+        addChildGroup.on('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const nodeElement = this.closest('.tree-node');
+            const nodeId = nodeElement.getAttribute('data-id');
+            addChildTask(nodeId);
+        });
         
         addChildGroup.selectAll('rect').remove();
         addChildGroup.append('rect')
@@ -838,9 +1149,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('class', 'edit-task')
             .attr('transform', 'translate(0, 20)')
             .style('cursor', 'pointer')
-            .on('click', (event, d) => {
+            .on('click', function(event, d) {
                 event.stopPropagation();
-                const nodeData = d3.select(event.currentTarget.parentNode.parentNode).datum();
+                const nodeData = d3.select(this.parentNode.parentNode).datum();
                 openEditor(nodeData.data.id);
             });
         
@@ -863,9 +1174,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('class', 'delete-task')
             .attr('transform', 'translate(0, 40)')
             .style('cursor', 'pointer')
-            .on('click', (event, d) => {
+            .on('click', function(event, d) {
                 event.stopPropagation();
-                const nodeData = d3.select(event.currentTarget.parentNode.parentNode).datum();
+                const nodeData = d3.select(this.parentNode.parentNode).datum();
                 deleteTask(nodeData.data.id);
             });
         
@@ -889,7 +1200,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('class', 'collapse-btn-group')
             .attr('transform', 'translate(105, 0)')
             .style('cursor', 'pointer')
-            .on('click', (event, d) => {
+            .on('click', function(event, d) {
                 event.stopPropagation();
                 toggleCollapse(d.data.id);
             })
@@ -956,8 +1267,94 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(buildVisualization, 100);
     });
     
+    // Calendar functions
+    function drawCalendar() {
+        calGrid.innerHTML = '';
+        weekdays.forEach(wd => {
+            const div = document.createElement('div');
+            div.className = 'cal-wd';
+            div.textContent = wd;
+            calGrid.appendChild(div);
+        });
+        
+        const firstDay = new Date(viewYear, viewMonth, 1);
+        const startDay = (firstDay.getDay() + 6) % 7;
+        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        
+        calTitle.textContent = firstDay.toLocaleString('en-GB', {month: 'long', year: 'numeric'});
+        
+        for (let i = 0; i < startDay; i++) {
+            const div = document.createElement('div');
+            div.className = 'cal-day out';
+            calGrid.appendChild(div);
+        }
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const iso = new Date(viewYear, viewMonth, day).toISOString().split('T')[0];
+            const div = document.createElement('div');
+            div.className = 'cal-day';
+            div.textContent = day;
+            if (iso === selectedDate) div.classList.add('sel');
+            div.onclick = () => {
+                selectedDate = iso;
+                drawCalendar();
+            };
+            calGrid.appendChild(div);
+        }
+    }
+    
+    // Calendar event listeners
+    editorDue.addEventListener('click', () => {
+        const today = new Date();
+        if (selectedDate) {
+            const date = new Date(selectedDate);
+            viewYear = date.getFullYear();
+            viewMonth = date.getMonth();
+        } else {
+            viewYear = today.getFullYear();
+            viewMonth = today.getMonth();
+        }
+        drawCalendar();
+        dateModal.style.display = 'flex';
+    });
+    
+    document.getElementById('prevM').addEventListener('click', () => {
+        viewMonth--;
+        if (viewMonth < 0) {
+            viewMonth = 11;
+            viewYear--;
+        }
+        drawCalendar();
+    });
+    
+    document.getElementById('nextM').addEventListener('click', () => {
+        viewMonth++;
+        if (viewMonth > 11) {
+            viewMonth = 0;
+            viewYear++;
+        }
+        drawCalendar();
+    });
+    
+    document.getElementById('okBtn').addEventListener('click', () => {
+        setDueDate(selectedDate || new Date().toISOString().split('T')[0]);
+        dateModal.style.display = 'none';
+    });
+    
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+        dateModal.style.display = 'none';
+    });
+    
+    dateModal.addEventListener('click', (e) => {
+        if (e.target === dateModal) dateModal.style.display = 'none';
+    });
+    
     // Initialize
     buildVisualization();
+    
+    // Prevent scrolling
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
 });
 </script>
 {% endblock %}

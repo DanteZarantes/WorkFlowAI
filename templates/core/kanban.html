@@ -22,33 +22,48 @@
         </header>
         
         <div class="composer-bar">
-            <input class="input" id="cText" placeholder="New AI task…" aria-label="Task text">
-            <select class="select" id="cPri" aria-label="Priority">
-                <option value="h">High</option>
-                <option value="m" selected>Medium</option>
-                <option value="l">Low</option>
-            </select>
-            <div class="fake-date" id="cDate" data-value="" role="button" aria-haspopup="dialog" aria-expanded="false">
-                <span id="cDateLabel">Pick deadline…</span><span class="muted">▾</span>
+            <input class="input" id="cText" placeholder="New task…" aria-label="Task text">
+            <div class="custom-select">
+                <select class="select" id="cPri" aria-label="Priority">
+                    <option value="h">🔴 High Priority</option>
+                    <option value="m" selected>🟡 Medium Priority</option>
+                    <option value="l">🟢 Low Priority</option>
+                </select>
+                <div class="select-arrow">▼</div>
             </div>
-            <button class="btn btn-primary" id="cAdd">Add Task</button>
+            <div class="fake-date" id="cDate" data-value="" role="button" aria-haspopup="dialog" aria-expanded="false">
+                <span id="cDateLabel">📅 Pick deadline…</span><span class="muted">▾</span>
+            </div>
+            <button class="btn btn-primary" id="cAdd">✨ Add Task</button>
         </div>
 
         <div class="kanban-grid" aria-live="polite">
             <div class="lane" data-col="overdue">
-                <h3>Overdue <span class="count">0</span></h3>
+                <div class="lane-header">
+                    <h3>🚨 Overdue</h3>
+                    <span class="count">0</span>
+                </div>
                 <div class="list"></div>
             </div>
             <div class="lane" data-col="today">
-                <h3>Today <span class="count">0</span></h3>
+                <div class="lane-header">
+                    <h3>⚡ Today</h3>
+                    <span class="count">0</span>
+                </div>
                 <div class="list"></div>
             </div>
             <div class="lane" data-col="upcoming">
-                <h3>Upcoming <span class="count">0</span></h3>
+                <div class="lane-header">
+                    <h3>📋 Upcoming</h3>
+                    <span class="count">0</span>
+                </div>
                 <div class="list"></div>
             </div>
             <div class="lane" data-col="done">
-                <h3>Done <span class="count">0</span></h3>
+                <div class="lane-header">
+                    <h3>✅ Completed</h3>
+                    <span class="count">0</span>
+                </div>
                 <div class="list"></div>
             </div>
         </div>
@@ -73,7 +88,7 @@
 
 <!-- Floating Trash Button -->
 <button class="fab" id="trashBtn" aria-label="Trash (deleted tasks)">
-    🗑
+    🗑️
     <span class="badge" id="trashBadge">0</span>
 </button>
 
@@ -132,8 +147,8 @@
 
 .composer-bar {
     display: flex;
-    gap: 1rem;
-    padding: 1rem;
+    gap: 0.75rem;
+    padding: 0.75rem;
     background: rgba(255,255,255,.03);
     border-bottom: 1px solid rgba(91,140,255,.1);
     align-items: center;
@@ -142,34 +157,78 @@
 }
 
 .input, .select {
-    padding: 10px 16px;
+    padding: 12px 16px;
     border: 1px solid rgba(91,140,255,.3);
-    border-radius: 8px;
-    background: rgba(255,255,255,.06);
+    border-radius: 12px;
+    background: rgba(255,255,255,.08);
     color: #e7ecf7;
     font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
 }
 
 .input {
     flex: 1;
-    min-width: 200px;
+    min-width: 250px;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    backdrop-filter: blur(10px);
+}
+
+.input:focus {
+    outline: none;
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 3px rgba(91,140,255,.2);
+    background: rgba(255,255,255,.12);
+}
+
+.custom-select {
+    position: relative;
+    min-width: 180px;
 }
 
 .select {
-    min-width: 120px;
+    width: 100%;
+    appearance: none;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    padding-right: 40px;
+}
+
+.select option {
+    background: #0b1222;
+    color: #e7ecf7;
+    padding: 8px 12px;
+}
+
+.select:focus {
+    outline: none;
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 3px rgba(91,140,255,.2);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9fb0d9;
+    pointer-events: none;
+    font-size: 0.8rem;
 }
 
 .fake-date {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
+    gap: 6px;
+    padding: 8px 12px;
     border: 1px solid rgba(91,140,255,.3);
-    border-radius: 8px;
+    border-radius: 6px;
     background: rgba(255,255,255,.06);
     color: #e7ecf7;
     cursor: pointer;
-    min-width: 160px;
+    min-width: 140px;
+    font-size: 0.9rem;
 }
 
 .fake-date:hover {
@@ -183,42 +242,56 @@
 
 .kanban-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    padding: 0.75rem;
     flex: 1;
     overflow-x: auto;
     max-width: 100%;
 }
 
 .lane {
-    background: rgba(255,255,255,.03);
+    background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
     border: 1px solid rgba(91,140,255,.2);
     border-radius: 12px;
-    padding: 1rem;
+    padding: 0.75rem;
     display: flex;
     flex-direction: column;
-    min-height: 400px;
-    max-height: 70vh;
-    min-width: 280px;
+    min-height: 350px;
+    max-height: 65vh;
+    min-width: 220px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.1);
+    backdrop-filter: blur(10px);
+}
+
+.lane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: rgba(255,255,255,.05);
+    border-radius: 8px;
+    border: 1px solid rgba(91,140,255,.2);
 }
 
 .lane h3 {
     color: #e7ecf7;
-    margin: 0 0 1rem 0;
+    margin: 0;
     font-size: 1.1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    font-weight: 600;
 }
 
 .count {
-    background: rgba(91,140,255,.2);
+    background: linear-gradient(135deg, rgba(91,140,255,.3), rgba(91,140,255,.2));
     color: #5b8cff;
-    padding: 2px 8px;
-    border-radius: 12px;
+    padding: 4px 10px;
+    border-radius: 15px;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
+    border: 1px solid rgba(91,140,255,.4);
+    min-width: 24px;
+    text-align: center;
 }
 
 .list {
@@ -226,23 +299,27 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    max-height: calc(70vh - 120px);
+    gap: 0.4rem;
+    max-height: calc(65vh - 100px);
     padding-right: 4px;
 }
 
 .task {
-    background: rgba(255,255,255,.06);
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
     border: 1px solid rgba(91,140,255,.3);
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
     cursor: grab;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    backdrop-filter: blur(10px);
 }
 
 .task:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(91,140,255,.2);
+    box-shadow: 0 6px 20px rgba(91,140,255,.3);
+    border-color: rgba(91,140,255,.5);
+    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
 }
 
 .task.drag {
@@ -253,58 +330,68 @@
 .task-title {
     color: #e7ecf7;
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 8px;
+    gap: 6px;
+    font-size: 0.9rem;
 }
 
 .pill {
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 12px;
     font-size: 0.7rem;
     font-weight: 600;
     cursor: pointer;
     flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    transition: all 0.2s ease;
 }
 
 .pill.h {
-    background: rgba(239,68,68,.2);
+    background: linear-gradient(135deg, rgba(239,68,68,.3), rgba(239,68,68,.2));
     color: #ef4444;
+    border: 1px solid rgba(239,68,68,.4);
 }
 
 .pill.m {
-    background: rgba(245,158,11,.2);
+    background: linear-gradient(135deg, rgba(245,158,11,.3), rgba(245,158,11,.2));
     color: #f59e0b;
+    border: 1px solid rgba(245,158,11,.4);
 }
 
 .pill.l {
-    background: rgba(34,197,94,.2);
+    background: linear-gradient(135deg, rgba(34,197,94,.3), rgba(34,197,94,.2));
     color: #22c55e;
+    border: 1px solid rgba(34,197,94,.4);
 }
 
 .meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #9fb0d9;
 }
 
 .icon-btn {
-    background: none;
-    border: none;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(91,140,255,.2);
     color: #9fb0d9;
     cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
+    padding: 6px;
+    border-radius: 6px;
     transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    font-size: 0.9rem;
 }
 
 .icon-btn:hover {
-    background: rgba(91,140,255,.1);
+    background: rgba(91,140,255,.15);
     color: #5b8cff;
+    border-color: rgba(91,140,255,.4);
+    transform: scale(1.05);
 }
 
 .icon-done:hover {
@@ -313,6 +400,8 @@
 
 .icon-del:hover {
     color: #ef4444;
+    background: rgba(239,68,68,.15);
+    border-color: rgba(239,68,68,.4);
 }
 
 .lane.drop {
@@ -462,42 +551,44 @@
 .fab {
     position: fixed;
     bottom: 30px;
-    right: 30px;
-    width: 60px;
-    height: 60px;
+    left: 30px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     border: none;
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     cursor: pointer;
-    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+    box-shadow: 0 8px 25px rgba(239,68,68,.4);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
+    z-index: 100;
 }
 
 .fab:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(91,140,255,.6);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 35px rgba(239,68,68,.6);
 }
 
 .badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ef4444;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
     color: white;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 0.7rem;
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(239,68,68,.4);
+    border: 2px solid rgba(255,255,255,.2);
 }
 
 /* Trash Modal */
@@ -639,10 +730,14 @@
     
     .fab {
         bottom: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
+        left: 20px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.3rem;
+    }
+    
+    .custom-select {
+        min-width: 150px;
     }
 }
 </style>
@@ -912,17 +1007,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     trashEmpty.addEventListener('click', () => {
         if (trash.length === 0) return;
-        if (confirm('Delete all items in Trash permanently?')) {
-            trash = [];
-            saveTrash(); renderTrashBadge(); renderTrashModal(); toast('Trash emptied', 'err');
-        }
+        trash = [];
+        saveTrash(); renderTrashBadge(); renderTrashModal(); toast('Trash emptied', 'err');
     });
 
     // Reset
     $('#reset').addEventListener('click', () => {
-        if (confirm('Clear all tasks from this board?')) {
-            tasks = []; save(); render(); toast('Board cleared', 'info');
-        }
+        tasks = []; save(); render(); toast('Board cleared', 'info');
     });
 
     // Initialize

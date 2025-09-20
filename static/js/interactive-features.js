@@ -256,45 +256,7 @@ class CodeEditor {
     }
 }
 
-// Performance Monitor
-class PerformanceMonitor {
-    constructor() {
-        this.metrics = {
-            loadTime: 0,
-            renderTime: 0,
-            memoryUsage: 0
-        };
-        this.init();
-    }
-    
-    init() {
-        // Measure page load time
-        window.addEventListener('load', () => {
-            this.metrics.loadTime = performance.now();
-            this.updateDisplay();
-        });
-        
-        // Monitor memory usage (if available)
-        if ('memory' in performance) {
-            setInterval(() => {
-                this.metrics.memoryUsage = performance.memory.usedJSHeapSize / 1048576; // MB
-                this.updateDisplay();
-            }, 5000);
-        }
-    }
-    
-    updateDisplay() {
-        const monitor = document.getElementById('performance-monitor');
-        if (monitor) {
-            monitor.innerHTML = `
-                <div style="position: fixed; top: 80px; left: 20px; background: rgba(11,18,34,.9); padding: 12px; border-radius: 8px; font-size: 0.8rem; color: #9fb0d9; z-index: 999;">
-                    Load: ${this.metrics.loadTime.toFixed(0)}ms<br>
-                    Memory: ${this.metrics.memoryUsage.toFixed(1)}MB
-                </div>
-            `;
-        }
-    }
-}
+
 
 // Initialize all features
 document.addEventListener('DOMContentLoaded', function() {
@@ -328,11 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         new CodeEditor(container, container.dataset.language || 'javascript');
     });
     
-    // Initialize performance monitor in development
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        new PerformanceMonitor();
-        document.body.insertAdjacentHTML('beforeend', '<div id="performance-monitor"></div>');
-    }
+
     
     // Add smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

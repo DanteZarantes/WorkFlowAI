@@ -6,8 +6,8 @@
 <section class="section">
     <div class="container">
         <div class="section-header">
-            <h1 class="section-title">AI Project Boards</h1>
-            <p class="section-subtitle">Organize your AI projects with intelligent task management</p>
+            <h1 class="section-title">Project Boards</h1>
+            <p class="section-subtitle">Organize your projects with intelligent task management</p>
         </div>
 
         <div class="toolbar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -35,17 +35,17 @@
 <div id="boardModal" class="modal-back" style="display: none;">
     <div class="modal" style="max-width: 600px;">
         <div class="modal-head">
-            <h3 id="modalTitle">Create AI Project Board</h3>
+            <h3 id="modalTitle">Create Project Board</h3>
             <button class="x" id="modalClose">✕</button>
         </div>
         <div class="modal-body">
             <label class="field">
                 <span>Project Name</span>
-                <input id="boardName" type="text" placeholder="e.g., AI Model Training Pipeline">
+                <input id="boardName" type="text" placeholder="e.g., Project Development Pipeline">
             </label>
             <label class="field">
                 <span>Description</span>
-                <textarea id="boardDesc" rows="3" placeholder="Brief description of your AI project"></textarea>
+                <textarea id="boardDesc" rows="3" placeholder="Brief description of your project"></textarea>
             </label>
             <div class="field">
                 <span>Board Type</span>
@@ -411,11 +411,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function deleteBoard(id) {
-        if (confirm('Are you sure you want to delete this board?')) {
-            boards = boards.filter(b => b.id !== id);
-            saveBoards();
-            renderBoards();
-        }
+        boards = boards.filter(b => b.id !== id);
+        saveBoards();
+        renderBoards();
     }
     
     function openModal() {
