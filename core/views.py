@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from utils.json_storage import json_storage
 
 def home(request):
     return render(request, 'core/home.html')
@@ -15,7 +17,28 @@ def contact(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'core/dashboard.html')
+    # Get user data from JSON storage for dashboard
+    user_data = json_storage.get_user_data(request.user.id)
+    tasks = json_storage.get_user_tasks(request.user.id)
+    projects = json_storage.get_user_projects(request.user.id)
+    models = json_storage.get_user_models(request.user.id)
+    
+    context = {
+        'user_data': user_data,
+        'stats': {
+            'total_tasks': len(tasks),
+            'completed_tasks': len([t for t in tasks if t.get('status') == 'completed']),
+            'total_projects': len(projects),
+            'active_projects': len([p for p in projects if p.get('status') == 'active']),
+            'total_models': len(models),
+            'active_models': len([m for m in models if m.get('status') == 'active'])
+        },
+        'recent_tasks': tasks[-5:] if tasks else [],
+        'recent_projects': projects[-3:] if projects else [],
+        'recent_activities': user_data.get('activities', [])[-10:] if user_data else []
+    }
+    
+    return render(request, 'core/dashboard.html', context)
 
 def pricing(request):
     return render(request, 'core/pricing.html')
@@ -53,7 +76,17 @@ def analytics(request):
 
 @login_required
 def models(request):
-    return render(request, 'core/models.html')
+    # Get user models from JSON storage
+    user_models = json_storage.get_user_models(request.user.id)
+    
+    context = {
+        'models': user_models,
+        'total_models': len(user_models),
+        'active_models': len([m for m in user_models if m.get('status') == 'active']),
+        'draft_models': len([m for m in user_models if m.get('status') == 'draft'])
+    }
+    
+    return render(request, 'core/models.html', context)
 
 @login_required
 def settings(request):

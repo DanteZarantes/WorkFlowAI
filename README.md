@@ -1,201 +1,222 @@
 # NeuralFlow - AI-Powered Business Solutions Platform
 
-A comprehensive full-stack web application that provides AI-powered business solutions with a modern React/Next.js frontend and robust Django REST API backend.
+A Django-based web application that provides AI-powered business solutions with user management, task organization, and JSON-based data storage.
 
 ## 🚀 Features
 
 ### Core Functionality
 - **User Authentication & Profiles** - Custom user system with extended profiles
-- **AI Model Management** - Create, train, and deploy AI models
-- **Project Organization** - Organize AI models into projects
-- **API Usage Tracking** - Monitor and limit API calls with detailed analytics
-- **User Connections** - Connect with other AI professionals and researchers
-- **Real-time Notifications** - Stay updated with system and user activities
+- **Task Management** - Create, organize, and track tasks with JSON storage
+- **Project Organization** - Manage projects with team collaboration features
+- **JSON Data Storage** - Automatic data persistence in organized JSON files
+- **Activity Tracking** - Comprehensive user activity logging
+- **Dashboard Analytics** - Real-time statistics and data visualization
 
-### AI Tools & Services
-- **Cost Calculator** - Interactive tool to estimate AI service costs
-- **Text Analyzer** - Sentiment analysis, readability scoring, and keyword extraction
-- **Color Palette Generator** - AI-powered color scheme generation
-- **Chatbot Builder** - Create intelligent conversational agents
-- **Computer Vision** - Image and video analysis capabilities
-- **Machine Learning Platform** - Custom ML model development
+### User Management
+- **Registration System** - Secure user registration with email validation
+- **Login System** - Email/username authentication with activity logging
+- **Profile Management** - Extended user profiles with skills and preferences
+- **User Directory** - Connect with other users in the platform
 
-### Modern UI/UX
-- **Responsive Design** - Mobile-first approach with CSS Grid layouts
-- **Interactive Components** - React-powered dynamic interfaces
-- **Theme Customization** - Multiple color themes and display preferences
-- **Floating Animations** - Smooth background animations and effects
-- **Professional Navigation** - Hamburger menu with organized sidebar
+### Data Management
+- **JSON Storage System** - Automatic data saving to organized JSON files
+- **Task Organization** - Priority-based task management with categories
+- **Project Tracking** - Project status, timeline, and team management
+- **Backup System** - Automated data backup and recovery
 
 ## 🛠️ Technology Stack
 
 ### Backend
 - **Django 5.1.3** - Python web framework
 - **Django REST Framework** - API development
-- **SQLite/PostgreSQL** - Database options
+- **SQLite** - Database for user authentication
 - **Custom User Model** - Extended authentication system
-- **CORS Headers** - Cross-origin request handling
+- **JSON Storage** - File-based data persistence
 
 ### Frontend
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type-safe JavaScript
-- **CSS Grid & Flexbox** - Advanced responsive layouts
-- **React Hooks** - Modern state management
-- **Chart.js** - Data visualization
-- **Three.js** - 3D graphics and animations
+- **HTML/CSS/JavaScript** - Standard web technologies
+- **CSS Grid & Flexbox** - Responsive layouts
+- **Django Templates** - Server-side rendering
+- **Bootstrap Components** - UI framework
 
 ## 📁 Project Structure
 
 ```
-neuralflow/
-├── backend/               # Django REST API
-│   ├── config/           # Django configuration
-│   ├── core/             # Main application logic
-│   ├── accounts/         # User management
-│   ├── utils/            # Utility functions
-│   ├── templates/        # HTML templates
-│   ├── static/           # Static assets
-│   ├── media/            # User uploads
-│   ├── logs/             # Application logs
-│   └── manage.py         # Django management
-├── frontend/             # Next.js application
-│   ├── app/              # App router pages
-│   ├── components/       # React components
-│   └── styles/           # CSS modules
+NeuralFlow1.0/
+├── config/               # Django configuration
+│   ├── settings/         # Environment-specific settings
+│   ├── urls.py           # URL routing
+│   └── wsgi.py           # WSGI configuration
+├── core/                 # Main application logic
+│   ├── management/       # Custom Django commands
+│   ├── views.py          # Core views
+│   └── models.py         # Core models
+├── accounts/             # User management
+│   ├── models.py         # User models
+│   ├── views.py          # Authentication views
+│   ├── forms.py          # User forms
+│   └── api_views.py      # API endpoints
+├── utils/                # Utility functions
+│   ├── json_storage.py   # JSON data management
+│   ├── data_initializer.py # Data setup utilities
+│   └── middleware.py     # Custom middleware
+├── data/                 # JSON data storage
+│   ├── users/            # User data files
+│   ├── tasks/            # Task data files
+│   ├── projects/         # Project data files
+│   └── models/           # AI model data files
+├── templates/            # HTML templates
+├── static/               # Static assets
 ├── docs/                 # Documentation
-└── README.md             # This file
+└── manage.py             # Django management
 ```
 
 ## 🔧 Installation & Setup
 
-### Backend Setup
+### Prerequisites
+- Python 3.9+ installed
+- Git installed
+- Virtual environment tool (venv)
+
+### Setup Steps
 ```bash
-cd backend
+# Clone the repository
+git clone <your-repo-url>
+cd NeuralFlow1.0
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate  # On Windows
+# source venv/bin/activate  # On macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Environment setup
-cp .env.example .env
-# Edit .env with your configuration
-
-# Database setup
+# Setup database
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
+
+# Initialize JSON data system
+python manage.py setup_data --sync-users
 
 # Start development server
 python manage.py runserver
 ```
 
-### Frontend Setup
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
 ## 🌐 Usage
 
-### Development URLs
-- **Django Backend**: `http://localhost:8000`
-- **Next.js Frontend**: `http://localhost:3000`
+### Application URLs
+- **Main Application**: `http://localhost:8000`
 - **Admin Panel**: `http://localhost:8000/admin`
-- **API Documentation**: `http://localhost:8000/api/docs`
+- **User Registration**: `http://localhost:8000/accounts/signup/`
+- **User Login**: `http://localhost:8000/accounts/login/`
+- **Dashboard**: `http://localhost:8000/dashboard/`
 
-### Key Features Access
-- **AI Tools**: Available in the main navigation and sidebar
-- **User Directory**: Connect with other users via profile dropdown
-- **Theme Settings**: Customize appearance through user menu
-- **Dashboard**: Monitor your AI models and usage statistics
+### Key Features
+- **User Registration**: Create new accounts with automatic JSON data storage
+- **Task Management**: Create and organize tasks via API endpoints
+- **Project Management**: Manage projects with team collaboration
+- **Dashboard**: View statistics and recent activities
+- **Profile Management**: Update user profiles and preferences
 
 ## 🔒 Security Features
 
-- **Environment Variables** - Sensitive data protection
+- **Django Authentication** - Built-in user authentication system
 - **CSRF Protection** - Cross-site request forgery prevention
 - **SQL Injection Prevention** - Django ORM protection
-- **File Upload Validation** - Secure file handling
-- **Rate Limiting** - API usage controls
 - **Session Security** - Secure session management
 - **Password Validation** - Strong password requirements
+- **Data Isolation** - User-specific JSON file storage
+- **Activity Logging** - Comprehensive user activity tracking
 
-## 📊 Database Models
+## 📊 Data Models
 
-### Core Models
-- **AIModel** - AI model configurations and metadata
-- **Project** - User project organization
-- **APIUsage** - API call tracking and analytics
-- **UserConnection** - User networking system
-- **Notification** - Real-time user notifications
-- **FileUpload** - Secure file management
-
-### User Models
-- **CustomUser** - Extended user with business features
+### Database Models
+- **CustomUser** - Extended user model with business features
 - **UserProfile** - Additional profile information
 - **UserActivity** - Activity tracking and analytics
+- **AIModel** - AI model configurations and metadata
+- **Project** - User project organization
+- **UserConnection** - User networking system
 
-## 🚀 Deployment
+### JSON Data Structure
+- **User Data** - Complete user profiles in `data/users/`
+- **Task Data** - Task management in `data/tasks/`
+- **Project Data** - Project information in `data/projects/`
+- **Model Data** - AI model configurations in `data/models/`
 
-### Environment Configuration
-1. Set production environment variables
-2. Configure database (PostgreSQL recommended)
-3. Set up static file serving
-4. Configure email backend
-5. Enable security settings
+## 📝 API Endpoints
 
-### Production Checklist
-- [ ] Set `DEBUG = False`
-- [ ] Configure secure `SECRET_KEY`
-- [ ] Set up HTTPS
-- [ ] Configure database backups
-- [ ] Set up monitoring and logging
-- [ ] Configure email service
-- [ ] Set up CDN for static files
+### Task Management
+- `POST /accounts/api/tasks/` - Create new task
+- `GET /accounts/api/tasks/` - Get user tasks
 
-## 🤝 Contributing
+### Project Management
+- `POST /accounts/api/projects/` - Create new project
+- `GET /accounts/api/projects/` - Get user projects
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+### AI Model Management
+- `POST /accounts/api/models/` - Create new AI model
+- `GET /accounts/api/models/` - Get user AI models
 
-## 📝 API Documentation
+### Dashboard Data
+- `GET /accounts/api/dashboard/` - Get dashboard statistics
 
-The API provides endpoints for:
-- User authentication and management
-- AI model CRUD operations
-- Project management
-- Usage analytics
-- File uploads
-- User connections
+## 🔧 Management Commands
 
-Access the interactive API documentation at `/api/docs` when running the development server.
+```bash
+# Initialize data system
+python manage.py setup_data
+
+# Sync existing users to JSON
+python manage.py setup_data --sync-users
+
+# Validate data integrity
+python manage.py setup_data --validate
+
+# Create data backup
+python manage.py setup_data --backup
+
+# Show storage statistics
+python manage.py setup_data --stats
+```
+
+## 🧪 Testing
+
+```bash
+# Run comprehensive JSON storage tests
+python test_json_storage.py
+
+# Run Django tests
+python manage.py test
+
+# Check system configuration
+python manage.py check
+```
+
+## 📚 Documentation
+
+Detailed documentation is available in the `docs/` folder:
+- `SETUP.md` - Detailed setup instructions
+- `DATA_SYSTEM.md` - JSON storage system documentation
+- `IMPLEMENTATION_SUMMARY.md` - Technical implementation details
 
 ## 🔧 Configuration
 
 ### Environment Variables
-See `backend/.env.example` for all available configuration options including:
-- Database settings
-- Email configuration
-- API keys
-- Security settings
-- Feature flags
+Copy `.env.example` to `.env` and configure:
+```env
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
 
 ### Custom Settings
-The application supports multiple environment configurations:
-- `development.py` - Local development
-- `production.py` - Production deployment
-- `base.py` - Shared settings
+- `config/settings/development.py` - Local development
+- `config/settings/production.py` - Production deployment
+- `config/settings/base.py` - Shared settings
 
 ---
 
-**Built with modern web technologies for scalable AI-powered business solutions.**
+**Built with Django for scalable business task management and user collaboration.**

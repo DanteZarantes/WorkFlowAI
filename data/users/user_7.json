@@ -1,0 +1,33 @@
+{
+  "user_id": 7,
+  "group_id": null,
+  "username": "testuser",
+  "email": "test@example.com",
+  "first_name": "Test",
+  "last_name": "User",
+  "user_type": "individual",
+  "company_name": "",
+  "job_title": "",
+  "bio": "",
+  "location": "",
+  "website": "",
+  "linkedin_url": "",
+  "github_url": "",
+  "skill_level": "beginner",
+  "subscription_plan": "free",
+  "api_calls_limit": 1000,
+  "api_calls_used": 0,
+  "is_profile_public": true,
+  "receive_notifications": true,
+  "date_joined": "2025-09-25T17:20:32.156857+00:00",
+  "last_login": null,
+  "updated_at": "2025-09-25T23:08:27.263262",
+  "activities": [
+    {
+      "type": "test_activity",
+      "description": "This is a test activity",
+      "metadata": {},
+      "timestamp": "2025-09-25T23:08:27.293274"
+    }
+  ]
+}

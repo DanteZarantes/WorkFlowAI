@@ -1,0 +1,46 @@
+{
+  "user_id": 8,
+  "group_id": null,
+  "username": "Dante",
+  "email": "dante212006@mail.ru",
+  "first_name": "",
+  "last_name": "",
+  "user_type": "individual",
+  "company_name": "",
+  "job_title": "",
+  "bio": "",
+  "location": "",
+  "website": "",
+  "linkedin_url": "",
+  "github_url": "",
+  "skill_level": "beginner",
+  "subscription_plan": "free",
+  "api_calls_limit": 1000,
+  "api_calls_used": 0,
+  "is_profile_public": true,
+  "receive_notifications": true,
+  "date_joined": "2025-09-25T17:35:30.887635+00:00",
+  "last_login": "2025-09-25T17:35:49.094771+00:00",
+  "updated_at": "2025-09-25T22:35:49.099008",
+  "profile": {
+    "skills": [],
+    "interests": [],
+    "experience_years": null,
+    "education": "",
+    "certifications": "",
+    "profile_views": 0,
+    "projects_count": 0,
+    "connections_count": 0
+  },
+  "activities": [
+    {
+      "type": "login",
+      "description": "User logged in",
+      "metadata": {
+        "ip_address": "127.0.0.1",
+        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      },
+      "timestamp": "2025-09-25T22:35:49.108410"
+    }
+  ]
+}

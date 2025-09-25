@@ -308,7 +308,7 @@
 
 .node-title {
     fill: #e7ecf7;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
     text-anchor: middle;
     dominant-baseline: middle;
@@ -752,18 +752,19 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('class', `node-card status-${node.status} priority-${node.priority}`);
-            rect.setAttribute('width', '180');
-            rect.setAttribute('height', '90');
-            rect.setAttribute('x', '-90');
-            rect.setAttribute('y', '-45');
+            rect.setAttribute('width', '240');
+            rect.setAttribute('height', '120');
+            rect.setAttribute('x', '-120');
+            rect.setAttribute('y', '-60');
             g.appendChild(rect);
             
-            // Priority emoji
+            // Priority emoji in bottom right corner
             const priorityEmoji = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             priorityEmoji.setAttribute('class', 'priority-emoji');
-            priorityEmoji.setAttribute('x', '-80');
-            priorityEmoji.setAttribute('y', '-25');
-            priorityEmoji.setAttribute('font-size', '12px');
+            priorityEmoji.setAttribute('x', '100');
+            priorityEmoji.setAttribute('y', '45');
+            priorityEmoji.setAttribute('font-size', '16px');
+            priorityEmoji.setAttribute('text-anchor', 'middle');
             const priorityEmojis = { low: '🟢', medium: '🟡', high: '🔴', critical: '🚨' };
             priorityEmoji.textContent = priorityEmojis[node.priority] || '🟡';
             g.appendChild(priorityEmoji);
@@ -771,8 +772,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Status indicator circle
             const statusCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             statusCircle.setAttribute('class', `status-indicator status-${node.status}`);
-            statusCircle.setAttribute('cx', '-75');
-            statusCircle.setAttribute('cy', '30');
+            statusCircle.setAttribute('cx', '-100');
+            statusCircle.setAttribute('cy', '40');
             statusCircle.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const currentStatus = node.status;
@@ -783,18 +784,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             title.setAttribute('class', 'node-title');
-            title.setAttribute('y', '-25');
-            title.setAttribute('x', '-55');
-            title.setAttribute('text-anchor', 'start');
+            title.setAttribute('y', '-30');
+            title.setAttribute('x', '0');
+            title.setAttribute('text-anchor', 'middle');
             title.textContent = node.title || 'Untitled Topic';
             g.appendChild(title);
             
             const desc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             desc.setAttribute('class', 'node-desc');
             desc.setAttribute('y', '-5');
-            desc.setAttribute('x', '-80');
+            desc.setAttribute('x', '-110');
             desc.setAttribute('text-anchor', 'start');
-            desc.textContent = node.desc ? (node.desc.length > 25 ? node.desc.substring(0, 25) + '...' : node.desc) : '';
+            desc.textContent = node.desc ? (node.desc.length > 35 ? node.desc.substring(0, 35) + '...' : node.desc) : '';
             g.appendChild(desc);
             
             // Due date
@@ -802,8 +803,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
             const isOverdue = node.due && node.due < today;
             dueDate.setAttribute('class', isOverdue ? 'node-due overdue' : 'node-due');
-            dueDate.setAttribute('y', '15');
-            dueDate.setAttribute('x', '-80');
+            dueDate.setAttribute('y', '20');
+            dueDate.setAttribute('x', '-110');
             dueDate.setAttribute('text-anchor', 'start');
             if (node.due) {
                 dueDate.textContent = isOverdue ? `⚠️ Overdue: ${node.due}` : `📅 Due: ${node.due}`;
@@ -813,13 +814,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const actions = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             actions.setAttribute('class', 'node-actions');
             
-            // Add button - positioned outside card
+            // Add button - positioned inside card top right
             const addBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            addBtn.setAttribute('transform', 'translate(110, -20)');
+            addBtn.setAttribute('transform', 'translate(90, -40)');
             addBtn.style.cursor = 'pointer';
             const addCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             addCircle.setAttribute('class', 'action-btn');
-            addCircle.setAttribute('r', '14');
+            addCircle.setAttribute('r', '12');
             const addText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             addText.setAttribute('class', 'action-icon');
             addText.textContent = '+';
@@ -830,13 +831,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 addNode(node.id);
             });
             
-            // Edit button - positioned outside card
+            // Edit button - positioned inside card middle right
             const editBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            editBtn.setAttribute('transform', 'translate(110, 10)');
+            editBtn.setAttribute('transform', 'translate(90, -10)');
             editBtn.style.cursor = 'pointer';
             const editCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             editCircle.setAttribute('class', 'action-btn');
-            editCircle.setAttribute('r', '14');
+            editCircle.setAttribute('r', '12');
             const editText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             editText.setAttribute('class', 'action-icon');
             editText.textContent = '✎';
@@ -847,13 +848,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 openEditor(node.id);
             });
             
-            // Delete button - positioned outside card
+            // Delete button - positioned inside card bottom right (above emoji)
             const delBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            delBtn.setAttribute('transform', 'translate(110, 40)');
+            delBtn.setAttribute('transform', 'translate(90, 20)');
             delBtn.style.cursor = 'pointer';
             const delCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             delCircle.setAttribute('class', 'action-btn');
-            delCircle.setAttribute('r', '14');
+            delCircle.setAttribute('r', '12');
             const delText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             delText.setAttribute('class', 'action-icon');
             delText.textContent = '🗑';

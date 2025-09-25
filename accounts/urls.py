@@ -13,6 +13,7 @@ All URLs are prefixed with /accounts/ (e.g., http://localhost:8000/accounts/logi
 from django.urls import path, include
 from django.contrib.auth.views import LoginView, LogoutView
 from . import views
+from .api_views import TaskAPIView, ProjectAPIView, ModelAPIView, dashboard_data
 
 # URL patterns for user authentication and account management
 urlpatterns = [
@@ -22,4 +23,10 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     path('signup/', views.signup, name='signup'),
     path('profile/', views.profile, name='profile'),
+    
+    # API endpoints for JSON data management
+    path('api/tasks/', TaskAPIView.as_view(), name='api_tasks'),
+    path('api/projects/', ProjectAPIView.as_view(), name='api_projects'),
+    path('api/models/', ModelAPIView.as_view(), name='api_models'),
+    path('api/dashboard/', dashboard_data, name='api_dashboard'),
 ]
