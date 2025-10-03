@@ -17,12 +17,15 @@ def create_board(request):
         data = json.loads(request.body)
         board_storage = BoardStorage()
         
-        board_id = board_storage.create_board(request.user.id, data)
+        # Ensure user_id is properly set
+        user_id = request.user.id
+        board_id = board_storage.create_board(user_id, data)
         
         return JsonResponse({
             'success': True,
             'board_id': board_id,
-            'message': 'Board created successfully'
+            'message': 'Board created successfully',
+            'user_id': user_id  # Debug info
         })
     except Exception as e:
         return JsonResponse({
@@ -35,11 +38,16 @@ def get_boards(request):
     """Get all user boards"""
     try:
         board_storage = BoardStorage()
-        boards = board_storage.get_user_boards(request.user.id)
+        user_id = request.user.id
+        boards = board_storage.get_user_boards(user_id)
+        
+        # Filter boards to ensure they belong to current user
+        user_boards = [board for board in boards if board.get('owner_id') == user_id]
         
         return JsonResponse({
             'success': True,
-            'boards': boards
+            'boards': user_boards,
+            'user_id': user_id  # Debug info
         })
     except Exception as e:
         return JsonResponse({

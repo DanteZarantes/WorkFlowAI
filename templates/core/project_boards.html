@@ -311,9 +311,13 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch('/api/boards/list/')
         .then(response => response.json())
         .then(data => {
+            console.log('Boards API response:', data); // Debug log
             if (data.success) {
                 boards = data.boards;
+                console.log('Loaded boards for user:', data.user_id, boards); // Debug log
                 renderBoards();
+            } else {
+                console.error('Failed to load boards:', data.error);
             }
         })
         .catch(console.error);
@@ -423,8 +427,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
+            console.log('Create board response:', data); // Debug log
             if (data.success) {
+                console.log('Board created for user:', data.user_id, 'Board ID:', data.board_id); // Debug log
                 location.reload();
+            } else {
+                console.error('Failed to create board:', data.error);
             }
         })
         .catch(console.error);

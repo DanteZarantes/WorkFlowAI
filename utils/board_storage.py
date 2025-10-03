@@ -23,6 +23,10 @@ class BoardStorage(SecureJSONStorage):
     
     def create_board(self, user_id: int, board_data: Dict[str, Any]) -> str:
         """Create a new board"""
+        # Validate user_id
+        if not user_id or user_id <= 0:
+            raise ValueError("Invalid user_id provided")
+            
         board_id = f"board_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{user_id}"
         
         board = {
@@ -30,7 +34,7 @@ class BoardStorage(SecureJSONStorage):
             'name': board_data.get('name', 'Untitled Board'),
             'description': board_data.get('description', ''),
             'type': board_data.get('type', 'mindmap'),
-            'owner_id': user_id,
+            'owner_id': user_id,  # Explicitly set owner
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat(),
             'settings': board_data.get('settings', {}),
@@ -42,19 +46,29 @@ class BoardStorage(SecureJSONStorage):
         existing_data = self._read_secure_file(file_path)
         
         if 'boards' not in existing_data:
-            existing_data = {'boards': []}
+            existing_data = {'boards': [], 'user_id': user_id}
         
         existing_data['boards'].append(board)
         existing_data['updated_at'] = datetime.now().isoformat()
+        existing_data['user_id'] = user_id  # Ensure user_id is stored
         
         self._write_secure_file(file_path, existing_data)
         return board_id
     
     def get_user_boards(self, user_id: int) -> List[Dict[str, Any]]:
         """Get all boards for a user"""
+        # Validate user_id
+        if not user_id or user_id <= 0:
+            return []
+            
         file_path = self._get_file_path('boards', user_id)
         data = self._read_secure_file(file_path)
-        return data.get('boards', [])
+        boards = data.get('boards', [])
+        
+        # Double-check ownership - filter out any boards that don't belong to this user
+        user_boards = [board for board in boards if board.get('owner_id') == user_id]
+        
+        return user_boards
     
     def get_board(self, user_id: int, board_id: str) -> Optional[Dict[str, Any]]:
         """Get specific board"""
@@ -63,11 +77,20 @@ class BoardStorage(SecureJSONStorage):
     
     def save_board_task(self, user_id: int, board_id: str, task_data: Dict[str, Any]) -> bool:
         """Save task to specific board with hierarchical numbering"""
+        # Validate user_id and board ownership
+        if not user_id or user_id <= 0:
+            return False
+            
+        # Verify board belongs to user
+        board = self.get_board(user_id, board_id)
+        if not board or board.get('owner_id') != user_id:
+            return False
+            
         file_path = self._get_file_path('board_tasks', user_id)
         existing_data = self._read_secure_file(file_path)
         
         if board_id not in existing_data:
-            existing_data[board_id] = {'tasks': [], 'updated_at': None}
+            existing_data[board_id] = {'tasks': [], 'updated_at': None, 'user_id': user_id}
         
         # Generate hierarchical task number
         parent_id = task_data.get('parent_id')
@@ -90,46 +113,85 @@ class BoardStorage(SecureJSONStorage):
         task_data['id'] = f"task_{len(existing_data[board_id]['tasks']) + 1}_{datetime.now().strftime('%H%M%S')}"
         task_data['board_id'] = board_id
         task_data['created_at'] = datetime.now().isoformat()
-        task_data['owner_id'] = user_id
+        task_data['owner_id'] = user_id  # Explicitly set owner
         task_data['status'] = task_data.get('status', 'Not Started')
         task_data['progress'] = task_data.get('progress', 0)
         
         existing_data[board_id]['tasks'].append(task_data)
         existing_data[board_id]['updated_at'] = datetime.now().isoformat()
+        existing_data[board_id]['user_id'] = user_id  # Ensure user_id is stored
         
         return self._write_secure_file(file_path, existing_data)
     
     def get_board_tasks(self, user_id: int, board_id: str) -> List[Dict[str, Any]]:
         """Get tasks for specific board"""
+        # Validate user_id and board ownership
+        if not user_id or user_id <= 0:
+            return []
+            
+        # Verify board belongs to user
+        board = self.get_board(user_id, board_id)
+        if not board or board.get('owner_id') != user_id:
+            return []
+            
         file_path = self._get_file_path('board_tasks', user_id)
         data = self._read_secure_file(file_path)
-        return data.get(board_id, {}).get('tasks', [])
+        tasks = data.get(board_id, {}).get('tasks', [])
+        
+        # Filter tasks to ensure they belong to the current user
+        user_tasks = [task for task in tasks if task.get('owner_id') == user_id]
+        
+        return user_tasks
     
     def save_board_project(self, user_id: int, board_id: str, project_data: Dict[str, Any]) -> bool:
         """Save project to specific board"""
+        # Validate user_id and board ownership
+        if not user_id or user_id <= 0:
+            return False
+            
+        # Verify board belongs to user
+        board = self.get_board(user_id, board_id)
+        if not board or board.get('owner_id') != user_id:
+            return False
+            
         file_path = self._get_file_path('board_projects', user_id)
         existing_data = self._read_secure_file(file_path)
         
         if board_id not in existing_data:
-            existing_data[board_id] = {'projects': [], 'updated_at': None}
+            existing_data[board_id] = {'projects': [], 'updated_at': None, 'user_id': user_id}
         
         project_data['id'] = f"proj_{len(existing_data[board_id]['projects']) + 1}_{datetime.now().strftime('%H%M%S')}"
         project_data['board_id'] = board_id
         project_data['created_at'] = datetime.now().isoformat()
-        project_data['owner_id'] = user_id
+        project_data['owner_id'] = user_id  # Explicitly set owner
         project_data['status'] = project_data.get('status', 'active')
         project_data['progress'] = project_data.get('progress', 0)
         
         existing_data[board_id]['projects'].append(project_data)
         existing_data[board_id]['updated_at'] = datetime.now().isoformat()
+        existing_data[board_id]['user_id'] = user_id  # Ensure user_id is stored
         
         return self._write_secure_file(file_path, existing_data)
     
     def get_board_projects(self, user_id: int, board_id: str) -> List[Dict[str, Any]]:
         """Get projects for specific board"""
+        # Validate user_id and board ownership
+        if not user_id or user_id <= 0:
+            return []
+            
+        # Verify board belongs to user
+        board = self.get_board(user_id, board_id)
+        if not board or board.get('owner_id') != user_id:
+            return []
+            
         file_path = self._get_file_path('board_projects', user_id)
         data = self._read_secure_file(file_path)
-        return data.get(board_id, {}).get('projects', [])
+        projects = data.get(board_id, {}).get('projects', [])
+        
+        # Filter projects to ensure they belong to the current user
+        user_projects = [project for project in projects if project.get('owner_id') == user_id]
+        
+        return user_projects
     
     def get_all_user_tasks(self, user_id: int) -> List[Dict[str, Any]]:
         """Get all tasks from all user boards"""
@@ -161,6 +223,15 @@ class BoardStorage(SecureJSONStorage):
     
     def update_board_task(self, user_id: int, board_id: str, task_id: str, updates: Dict[str, Any]) -> bool:
         """Update specific task in board"""
+        # Validate user_id and board ownership
+        if not user_id or user_id <= 0:
+            return False
+            
+        # Verify board belongs to user
+        board = self.get_board(user_id, board_id)
+        if not board or board.get('owner_id') != user_id:
+            return False
+            
         file_path = self._get_file_path('board_tasks', user_id)
         data = self._read_secure_file(file_path)
         
@@ -168,7 +239,7 @@ class BoardStorage(SecureJSONStorage):
             return False
         
         for task in data[board_id]['tasks']:
-            if task.get('id') == task_id:
+            if task.get('id') == task_id and task.get('owner_id') == user_id:
                 task.update(updates)
                 task['updated_at'] = datetime.now().isoformat()
                 break
@@ -180,6 +251,15 @@ class BoardStorage(SecureJSONStorage):
     
     def delete_board_task(self, user_id: int, board_id: str, task_id: str) -> bool:
         """Delete task from board"""
+        # Validate user_id and board ownership
+        if not user_id or user_id <= 0:
+            return False
+            
+        # Verify board belongs to user
+        board = self.get_board(user_id, board_id)
+        if not board or board.get('owner_id') != user_id:
+            return False
+            
         file_path = self._get_file_path('board_tasks', user_id)
         data = self._read_secure_file(file_path)
         
@@ -187,7 +267,9 @@ class BoardStorage(SecureJSONStorage):
             return False
         
         original_count = len(data[board_id]['tasks'])
-        data[board_id]['tasks'] = [t for t in data[board_id]['tasks'] if t.get('id') != task_id]
+        # Only delete tasks that belong to the current user
+        data[board_id]['tasks'] = [t for t in data[board_id]['tasks'] 
+                                  if not (t.get('id') == task_id and t.get('owner_id') == user_id)]
         
         if len(data[board_id]['tasks']) < original_count:
             data[board_id]['updated_at'] = datetime.now().isoformat()
