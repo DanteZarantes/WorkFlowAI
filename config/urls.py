@@ -38,9 +38,18 @@ urlpatterns = [
     # Access at: http://localhost:8000/accounts/
     path('accounts/', include('accounts.urls')),
     
+    # JWT Authentication URLs
+    # Includes: JWT login, register, token refresh
+    # Access at: http://localhost:8000/accounts/
+    path('accounts/', include('accounts.urls_jwt')),
+    
     # API Endpoint for User Profile
     # Access at: http://localhost:8000/api/auth/user/
     path('api/auth/user/', user_profile, name='api_user'),
+    
+    # Board Management URLs
+    # Access at: http://localhost:8000/api/boards/
+    path('', include('core.board_urls')),
 ]
 
 # Serve static and media files during development

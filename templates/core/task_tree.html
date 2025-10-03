@@ -3,6 +3,7 @@
 {% block title %}Task Tree - NeuralFlow{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <section class="section" style="padding: 0; height: 100vh; overflow: hidden;">
     <div class="tree-container">
         <header class="tree-toolbar">
@@ -44,6 +45,22 @@
     </div>
 </section>
 
+<!-- Calendar Modal -->
+<div class="modal-back" id="dateModal" style="display: none;">
+    <div class="modal">
+        <div class="cal-head">
+            <button class="btn small" id="prevM">←</button>
+            <div id="calTitle"></div>
+            <button class="btn small" id="nextM">→</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-foot">
+            <button class="btn small" id="okBtn">Set</button>
+            <button class="btn small" id="cancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <!-- Task Editor Modal -->
 <div id="taskEditor" class="modal-back" style="display: none;">
     <div class="modal">
@@ -62,7 +79,7 @@
             </label>
             <label class="field">
                 <span>Due Date</span>
-                <div class="fake-date" id="editorDue" data-value="" role="button" aria-haspopup="dialog" aria-expanded="false">
+                <div class="fake-date" id="editorDue" data-value="">
                     <span id="dueDateLabel">📅 Pick deadline…</span><span class="muted">▾</span>
                 </div>
             </label>
@@ -98,21 +115,7 @@
     </div>
 </div>
 
-<!-- Calendar Modal -->
-<div class="modal-back" id="dateModal" role="dialog" aria-modal="true" aria-labelledby="calTitle">
-    <div class="modal">
-        <div class="cal-head">
-            <button class="btn small" id="prevM" aria-label="Previous month">←</button>
-            <div id="calTitle"></div>
-            <button class="btn small" id="nextM" aria-label="Next month">→</button>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
-        <div class="cal-foot">
-            <button class="btn small" id="okBtn">Set</button>
-            <button class="btn small" id="cancelBtn">Cancel</button>
-        </div>
-    </div>
-</div>
+
 
 <style>
 html, body {
@@ -444,85 +447,7 @@ html, body {
     transition: all 0.2s ease;
 }
 
-.fake-date {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    border: 1px solid rgba(91,140,255,.3);
-    border-radius: 8px;
-    background: rgba(255,255,255,.06);
-    color: #e7ecf7;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s ease;
-}
 
-.fake-date:hover {
-    background: rgba(255,255,255,.08);
-    border-color: #5b8cff;
-}
-
-.muted {
-    color: #9fb0d9;
-}
-
-.cal-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background: rgba(91,140,255,.1);
-    color: #e7ecf7;
-    font-weight: 600;
-}
-
-.cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: rgba(91,140,255,.1);
-    padding: 1px;
-}
-
-.cal-wd, .cal-day {
-    padding: 8px;
-    text-align: center;
-    background: #0b1222;
-    color: #e7ecf7;
-}
-
-.cal-wd {
-    font-weight: 600;
-    color: #9fb0d9;
-    font-size: 0.8rem;
-}
-
-.cal-day {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.cal-day:hover {
-    background: rgba(91,140,255,.2);
-}
-
-.cal-day.sel {
-    background: #5b8cff;
-    color: white;
-}
-
-.cal-day.out {
-    opacity: 0.3;
-    cursor: default;
-}
-
-.cal-foot {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    padding: 1rem;
-}
 
 .btn.small {
     padding: 6px 12px;
@@ -722,6 +647,86 @@ html, body {
 .custom-select-wrapper select:focus + .select-arrow {
     color: #5b8cff;
 }
+
+.fake-date {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 8px;
+    background: rgba(255,255,255,.06);
+    color: #e7ecf7;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.fake-date:hover {
+    background: rgba(255,255,255,.08);
+    border-color: #5b8cff;
+}
+
+.muted {
+    color: #9fb0d9;
+}
+
+.cal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(91,140,255,.1);
+    color: #e7ecf7;
+    font-weight: 600;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: rgba(91,140,255,.1);
+    padding: 1px;
+}
+
+.cal-wd, .cal-day {
+    padding: 8px;
+    text-align: center;
+    background: #0b1222;
+    color: #e7ecf7;
+}
+
+.cal-wd {
+    font-weight: 600;
+    color: #9fb0d9;
+    font-size: 0.8rem;
+}
+
+.cal-day {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cal-day:hover {
+    background: rgba(91,140,255,.2);
+}
+
+.cal-day.sel {
+    background: #5b8cff;
+    color: white;
+}
+
+.cal-day.out {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.cal-foot {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 1rem;
+}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -756,6 +761,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let viewYear = new Date().getFullYear();
     let viewMonth = new Date().getMonth();
     const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    
+
     const editorPriority = document.getElementById('editorPriority');
     const editorStatus = document.getElementById('editorStatus');
     
@@ -763,9 +770,26 @@ document.addEventListener('DOMContentLoaded', function() {
     let pendingParentId = null;
     let currentLayout = 'tree';
     
-    // Data management
-    const STORAGE_KEY = `neuralflow_tree_${currentBoard.id || 'default'}`;
-    let treeData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"nodes": []}');
+    // Data management - use board storage
+    const boardId = currentBoard.id || 'default';
+    let treeData = { nodes: [] };
+    
+    function loadBoardTasks() {
+        if (boardId !== 'default') {
+            fetch(`/api/boards/${boardId}/tasks/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        treeData.nodes = convertTasksToNodes(data.tasks);
+                        buildVisualization();
+                    }
+                })
+                .catch(console.error);
+        }
+    }
+    
+    // Load board tasks on init
+    loadBoardTasks();
     
     // Ensure nodes have required properties
     treeData.nodes.forEach(node => {
@@ -774,8 +798,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(treeData));
+        // Save to board storage instead of localStorage
         updateStats();
+    }
+    
+    function convertTasksToNodes(tasks) {
+        // Convert board tasks to tree nodes
+        return tasks.map(task => ({
+            id: task.id,
+            title: task.title || 'Untitled Task',
+            desc: task.description || '',
+            due: task.due_date || '',
+            priority: task.priority || 'medium',
+            status: task.status?.toLowerCase().replace(' ', '') || 'todo',
+            children: [],
+            collapsed: false,
+            task_number: task.task_number || '1'
+        }));
     }
     
     function updateStats() {
@@ -805,21 +844,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Node management
     function addRootTask() {
-        const newTask = {
-            id: generateId(),
-            title: '',
-            desc: '',
-            due: '',
-            priority: 'medium',
-            status: 'todo',
-            children: [],
-            collapsed: false
-        };
-        
-        treeData.nodes.push(newTask);
-        saveData();
-        buildVisualization();
-        openEditor(newTask.id);
+        openEditor(null);
     }
     
     function addChildTask(parentId) {
@@ -828,39 +853,54 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function createChildTask() {
-        if (!pendingParentId) return;
-        
-        const parent = findNode(treeData.nodes, pendingParentId);
-        if (!parent) return;
-        
         const title = editorTitle.value.trim() || 'Untitled Task';
         const desc = editorDesc.value.trim();
         const due = editorDue.dataset.value;
         const priority = editorPriority.value;
         const status = editorStatus.value;
         
-        const newTask = {
-            id: generateId(),
+        const taskData = {
             title,
-            desc,
-            due,
+            description: desc,
+            due_date: due,
             priority,
             status,
-            children: [],
-            collapsed: false
+            board_id: boardId,
+            parent_id: pendingParentId
         };
         
-        parent.children.push(newTask);
-        pendingParentId = null;
-        saveData();
-        buildVisualization();
-        closeEditor();
+        fetch('/api/boards/tasks/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(taskData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadBoardTasks();
+                closeEditor();
+            }
+        })
+        .catch(console.error);
     }
     
     function deleteTask(nodeId) {
-        treeData.nodes = removeNodeFromTree(treeData.nodes, nodeId);
-        saveData();
-        buildVisualization();
+        fetch(`/api/boards/${boardId}/tasks/${nodeId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadBoardTasks();
+            }
+        })
+        .catch(console.error);
     }
     
     function findNode(nodes, id) {
@@ -894,12 +934,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function updateTask(nodeId, data) {
-        const node = findNode(treeData.nodes, nodeId);
-        if (node) {
-            Object.assign(node, data);
-            saveData();
-            buildVisualization();
-        }
+        fetch(`/api/boards/${boardId}/tasks/${nodeId}/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                loadBoardTasks();
+            }
+        })
+        .catch(console.error);
     }
     
     // Editor functions
@@ -942,17 +991,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function saveEditor() {
-        if (pendingParentId) {
-            createChildTask();
-        } else if (editingNodeId) {
+        if (editingNodeId) {
             const title = editorTitle.value.trim() || 'Untitled Task';
             const desc = editorDesc.value.trim();
             const due = editorDue.dataset.value;
             const priority = editorPriority.value;
             const status = editorStatus.value;
             
-            updateTask(editingNodeId, { title, desc, due, priority, status });
+            updateTask(editingNodeId, { title, description: desc, due_date: due, priority, status });
             closeEditor();
+        } else {
+            createChildTask();
         }
     }
     
@@ -1267,6 +1316,8 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(buildVisualization, 100);
     });
     
+
+    
     // Calendar functions
     function drawCalendar() {
         calGrid.innerHTML = '';
@@ -1303,7 +1354,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Calendar event listeners
+    // Calendar event listeners - only show when clicked
     editorDue.addEventListener('click', () => {
         const today = new Date();
         if (selectedDate) {

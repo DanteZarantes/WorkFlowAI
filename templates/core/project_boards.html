@@ -3,6 +3,7 @@
 {% block title %}Project Boards - NeuralFlow{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <section class="section">
     <div class="container">
         <div class="section-header">
@@ -304,7 +305,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const boardDesc = document.getElementById('boardDesc');
     const typeGrid = document.getElementById('typeGrid');
     
-    let boards = JSON.parse(localStorage.getItem('neuralflow_boards') || '[]');
+    let boards = [];
+    
+    // Load boards from server
+    fetch('/api/boards/list/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                boards = data.boards;
+                renderBoards();
+            }
+        })
+        .catch(console.error);
     let currentFilter = 'all';
     
     const boardTypes = {
@@ -319,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function saveBoards() {
-        localStorage.setItem('neuralflow_boards', JSON.stringify(boards));
+        // Boards are now saved on server via API
     }
     
     function renderBoards() {
@@ -396,17 +408,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedType = document.querySelector('input[name="btype"]:checked')?.value || 'mindmap';
         
         const newBoard = {
-            id: generateId(),
             name: name,
             description: description,
-            type: selectedType,
-            created: new Date().toISOString(),
-            tasks: 0
+            type: selectedType
         };
         
-        boards.unshift(newBoard);
-        saveBoards();
-        renderBoards();
+        fetch('/api/boards/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(newBoard)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(console.error);
+        
         closeModal();
     }
     

@@ -1,0 +1,49 @@
+/* Scrollbar Fix - Highest Priority */
+
+/* Force custom scrollbar on all elements */
+::-webkit-scrollbar {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+::-webkit-scrollbar-track {
+    background: #e9ecef !important;
+    border-radius: 12px !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    border-radius: 12px !important;
+    border: 3px solid #e9ecef !important;
+    min-height: 30px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%) !important;
+    border: 2px solid #e9ecef !important;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg, #004085 0%, #002752 100%) !important;
+}
+
+::-webkit-scrollbar-corner {
+    background: #e9ecef !important;
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: auto !important;
+    scrollbar-color: #007bff #e9ecef !important;
+}
+
+/* Force on body and html */
+html {
+    overflow-y: scroll !important;
+}
+
+body {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}

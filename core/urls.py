@@ -19,7 +19,7 @@ urlpatterns = [
     # Main Pages
     path('', views.home, name='home'),                           # Homepage
     path('about/', views.about, name='about'),                   # About Us
-    path('services/', views.services, name='services'),         # AI Services
+
     path('contact/', views.contact, name='contact'),             # Contact Form
     path('pricing/', views.pricing, name='pricing'),             # Pricing Plans
     
@@ -33,10 +33,10 @@ urlpatterns = [
     path('tutorials/', views.tutorials, name='tutorials'),       # Learning Tutorials
     path('api-docs/', views.api_docs, name='api_docs'),         # API Documentation
     path('community/', views.community, name='community'),       # Community Hub
-    path('help/', views.help_center, name='help_center'),       # Help Center
+
     
     # Company Pages
-    path('careers/', views.careers, name='careers'),             # Job Openings
+
     path('team/', views.team, name='team'),                     # Team Members
     path('press/', views.press, name='press'),                  # Press & Media
     path('privacy/', views.privacy, name='privacy'),             # Privacy Policy
@@ -44,17 +44,15 @@ urlpatterns = [
     
     # AI Services & Tools
     path('machine-learning/', views.machine_learning, name='machine_learning'), # ML Platform
-    path('chatbots/', views.chatbots, name='chatbots'),         # Chatbot Builder
-    path('computer-vision/', views.computer_vision, name='computer_vision'), # Computer Vision
+
+
     path('ai-visualization/', views.ai_visualization, name='ai_visualization'), # 3D Visualization
     
     # Interactive Tools
-    path('calculator/', views.calculator, name='calculator'),    # Cost Calculator
-    path('text-analyzer/', views.text_analyzer, name='text_analyzer'), # Text Analysis
-    path('color-generator/', views.color_generator, name='color_generator'), # Color Palette
     
     # Project Management
     path('project-boards/', views.project_boards, name='project_boards'), # AI Project Boards
+
     path('ai-tools/mindmap/', views.mindmap, name='mindmap'),    # Mind Map Tool
     path('ai-tools/task-tree/', views.task_tree, name='task_tree'), # Task Tree Tool
     path('ai-tools/kanban/', views.kanban, name='kanban'),       # Kanban Board
@@ -66,4 +64,6 @@ urlpatterns = [
     path('settings/', views.settings, name='settings'),         # Account Settings
     path('user-directory/', views.user_directory, name='user_directory'), # Find Users
     path('theme-settings/', views.theme_settings, name='theme_settings'), # Theme Customization
+    
+
 ]

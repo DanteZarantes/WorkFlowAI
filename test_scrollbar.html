@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+::-webkit-scrollbar {
+    width: 20px !important;
+}
+::-webkit-scrollbar-track {
+    background: red !important;
+}
+::-webkit-scrollbar-thumb {
+    background: blue !important;
+    border-radius: 10px !important;
+}
+body {
+    height: 200vh !important;
+    background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff);
+}
+</style>
+</head>
+<body>
+<h1>Test Scrollbar</h1>
+<p>Scroll down to see custom scrollbar</p>
+<div style="height: 2000px; background: repeating-linear-gradient(45deg, #ccc, #ccc 10px, #fff 10px, #fff 20px);">
+    <p>Long content to force scrollbar...</p>
+</div>
+</body>
+</html>

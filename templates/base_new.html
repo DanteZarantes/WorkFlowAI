@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}?v={% now 'U' %}">
+    <link rel="stylesheet" href="{% static 'css/scrollbar-enhancement.css' %}?v={% now 'U' %}">
     
     <!-- React and Interactive Libraries -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -822,7 +823,6 @@
                     <a href="{% url 'about' %}" class="nav-link">Company <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
                     <div class="dropdown-content">
                         <a href="{% url 'about' %}"><i class="fas fa-info-circle"></i> About Us</a>
-                        <a href="{% url 'careers' %}"><i class="fas fa-briefcase"></i> Careers</a>
                         <a href="{% url 'team' %}"><i class="fas fa-users"></i> Our Team</a>
                         <a href="{% url 'press' %}"><i class="fas fa-newspaper"></i> Press</a>
                         <a href="{% url 'contact' %}"><i class="fas fa-envelope"></i> Contact</a>
@@ -830,13 +830,10 @@
                 </div>
                 
                 <div class="dropdown">
-                    <a href="{% url 'services' %}" class="nav-link">Solutions <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
+                    <a href="#" class="nav-link">Solutions <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
                     <div class="dropdown-content">
-                        <a href="{% url 'services' %}"><i class="fas fa-cogs"></i> Smart Services</a>
                         <a href="{% url 'machine_learning' %}"><i class="fas fa-brain"></i> Data Analytics</a>
-                        <a href="{% url 'chatbots' %}"><i class="fas fa-comments"></i> Chat Support</a>
                         <a href="{% url 'analytics' %}"><i class="fas fa-chart-line"></i> Analytics</a>
-                        <a href="{% url 'computer_vision' %}"><i class="fas fa-eye"></i> Image Processing</a>
                         <a href="{% url 'ai_visualization' %}"><i class="fas fa-cube"></i> 3D Visualization</a>
                         <a href="{% url 'project_boards' %}"><i class="fas fa-project-diagram"></i> Project Boards</a>
                     </div>
@@ -845,12 +842,7 @@
                 <div class="dropdown">
                     <a href="#" class="nav-link">Tools <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
                     <div class="dropdown-content">
-                        <a href="{% url 'calculator' %}"><i class="fas fa-calculator"></i> Cost Calculator</a>
-                        <a href="{% url 'text_analyzer' %}"><i class="fas fa-file-alt"></i> Text Analyzer</a>
-                        <a href="{% url 'color_generator' %}"><i class="fas fa-palette"></i> Color Generator</a>
                         <a href="{% url 'project_boards' %}"><i class="fas fa-project-diagram"></i> Project Boards</a>
-                        <a href="{% url 'mindmap' %}"><i class="fas fa-brain"></i> Mind Maps</a>
-                        <a href="{% url 'task_tree' %}"><i class="fas fa-sitemap"></i> Task Trees</a>
                     </div>
                 </div>
                 
@@ -861,7 +853,6 @@
                         <a href="{% url 'api_docs' %}"><i class="fas fa-code"></i> API Docs</a>
                         <a href="{% url 'tutorials' %}"><i class="fas fa-book"></i> Tutorials</a>
                         <a href="{% url 'community' %}"><i class="fas fa-users"></i> Community</a>
-                        <a href="{% url 'help_center' %}"><i class="fas fa-question-circle"></i> Help Center</a>
                     </div>
                 </div>
                 
@@ -922,25 +913,15 @@
             <div class="sidebar-section">
                 <div class="sidebar-title">Main</div>
                 <a href="{% url 'about' %}" class="sidebar-link"><i class="fas fa-info-circle"></i>About</a>
-                <a href="{% url 'services' %}" class="sidebar-link"><i class="fas fa-robot"></i>Services</a>
                 <a href="{% url 'pricing' %}" class="sidebar-link"><i class="fas fa-tags"></i>Pricing</a>
                 <a href="{% url 'contact' %}" class="sidebar-link"><i class="fas fa-envelope"></i>Contact</a>
             </div>
             
-            <div class="sidebar-section">
-                <div class="sidebar-title">Productivity Tools</div>
-                <a href="{% url 'calculator' %}" class="sidebar-link"><i class="fas fa-calculator"></i>Cost Calculator</a>
-                <a href="{% url 'text_analyzer' %}" class="sidebar-link"><i class="fas fa-file-alt"></i>Text Analyzer</a>
-                <a href="{% url 'color_generator' %}" class="sidebar-link"><i class="fas fa-palette"></i>Color Generator</a>
-                <a href="{% url 'chatbots' %}" class="sidebar-link"><i class="fas fa-comments"></i>Chat Support</a>
-                <a href="{% url 'computer_vision' %}" class="sidebar-link"><i class="fas fa-eye"></i>Image Tools</a>
-            </div>
+
             
             <div class="sidebar-section">
                 <div class="sidebar-title">Project Management</div>
                 <a href="{% url 'project_boards' %}" class="sidebar-link"><i class="fas fa-project-diagram"></i>Project Boards</a>
-                <a href="{% url 'mindmap' %}" class="sidebar-link"><i class="fas fa-brain"></i>Mind Maps</a>
-                <a href="{% url 'task_tree' %}" class="sidebar-link"><i class="fas fa-sitemap"></i>Task Trees</a>
             </div>
             
             <div class="sidebar-section">
@@ -949,7 +930,6 @@
                 <a href="{% url 'tutorials' %}" class="sidebar-link"><i class="fas fa-book"></i>Tutorials</a>
                 <a href="{% url 'api_docs' %}" class="sidebar-link"><i class="fas fa-code"></i>API Docs</a>
                 <a href="{% url 'community' %}" class="sidebar-link"><i class="fas fa-users"></i>Community</a>
-                <a href="{% url 'help_center' %}" class="sidebar-link"><i class="fas fa-question-circle"></i>Help</a>
             </div>
             
             {% if user.is_authenticated %}
