@@ -1,0 +1,648 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Productivity Tips - WorkFlowAI{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">🚀 Productivity Tips</h1>
+            <p class="section-subtitle">Master your workflow with proven productivity techniques</p>
+        </div>
+
+        <div class="tips-grid">
+            <div class="tip-category">
+                <h2>⏰ Time Management</h2>
+                <div class="tips-list">
+                    <div class="tip-card">
+                        <div class="tip-icon">🍅</div>
+                        <h3>Pomodoro Technique</h3>
+                        <p>Work in 25-minute focused intervals followed by 5-minute breaks. After 4 cycles, take a longer 15-30 minute break.</p>
+                        <div class="tip-actions">
+                            <button class="btn btn-primary" onclick="startPomodoro()">Start Timer</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">📋</div>
+                        <h3>Time Blocking</h3>
+                        <p>Schedule specific time blocks for different types of work. Dedicate uninterrupted time to important tasks.</p>
+                        <div class="tip-actions">
+                            <button class="btn btn-secondary" onclick="createTimeBlock()">Create Block</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">🎯</div>
+                        <h3>2-Minute Rule</h3>
+                        <p>If a task takes less than 2 minutes, do it immediately rather than adding it to your to-do list.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tip-category">
+                <h2>📊 Task Organization</h2>
+                <div class="tips-list">
+                    <div class="tip-card">
+                        <div class="tip-icon">🔥</div>
+                        <h3>Eisenhower Matrix</h3>
+                        <p>Categorize tasks by urgency and importance: Do, Schedule, Delegate, or Delete.</p>
+                        <div class="matrix-demo">
+                            <div class="matrix-grid">
+                                <div class="matrix-cell urgent-important">Do First</div>
+                                <div class="matrix-cell important">Schedule</div>
+                                <div class="matrix-cell urgent">Delegate</div>
+                                <div class="matrix-cell neither">Delete</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">🐸</div>
+                        <h3>Eat That Frog</h3>
+                        <p>Tackle your most challenging or important task first thing in the morning when your energy is highest.</p>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">📝</div>
+                        <h3>Getting Things Done (GTD)</h3>
+                        <p>Capture everything in a trusted system, clarify what it means, organize by context, and review regularly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tip-category">
+                <h2>🧠 Focus & Concentration</h2>
+                <div class="tips-list">
+                    <div class="tip-card">
+                        <div class="tip-icon">🔕</div>
+                        <h3>Digital Minimalism</h3>
+                        <p>Turn off non-essential notifications, use website blockers, and create phone-free zones during work.</p>
+                        <div class="tip-actions">
+                            <button class="btn btn-secondary" onclick="enableFocusMode()">Focus Mode</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">🎵</div>
+                        <h3>Background Sounds</h3>
+                        <p>Use white noise, nature sounds, or instrumental music to improve concentration and block distractions.</p>
+                        <div class="sound-controls">
+                            <button class="sound-btn" onclick="playSound('rain')">🌧️ Rain</button>
+                            <button class="sound-btn" onclick="playSound('forest')">🌲 Forest</button>
+                            <button class="sound-btn" onclick="playSound('cafe')">☕ Café</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">🧘</div>
+                        <h3>Mindfulness Breaks</h3>
+                        <p>Take short meditation or breathing breaks to reset your focus and reduce stress throughout the day.</p>
+                        <div class="tip-actions">
+                            <button class="btn btn-primary" onclick="startBreathingExercise()">Breathing Exercise</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tip-category">
+                <h2>⚡ Energy Management</h2>
+                <div class="tips-list">
+                    <div class="tip-card">
+                        <div class="tip-icon">🌅</div>
+                        <h3>Chronotype Awareness</h3>
+                        <p>Identify your natural energy peaks and schedule your most important work during these times.</p>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">💧</div>
+                        <h3>Hydration & Nutrition</h3>
+                        <p>Stay hydrated and eat brain-healthy foods. Avoid heavy meals that can cause energy crashes.</p>
+                        <div class="hydration-tracker">
+                            <p>Daily Water Goal: <span id="waterCount">0</span>/8 glasses</p>
+                            <button class="btn btn-secondary" onclick="addWater()">💧 Add Glass</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tip-card">
+                        <div class="tip-icon">🚶</div>
+                        <h3>Movement Breaks</h3>
+                        <p>Take regular walking breaks, do desk stretches, or try the 20-20-20 rule for eye strain.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="productivity-tools">
+            <h2>🛠️ Productivity Tools</h2>
+            <div class="tools-grid">
+                <div class="tool-card" onclick="window.location.href='/project-boards/'">
+                    <div class="tool-icon">📋</div>
+                    <h3>Project Boards</h3>
+                    <p>Visual project management with Kanban boards</p>
+                </div>
+                <div class="tool-card" onclick="window.location.href='/ai-tools/task-tree/'">
+                    <div class="tool-icon">🌳</div>
+                    <h3>Task Tree</h3>
+                    <p>Hierarchical task breakdown and organization</p>
+                </div>
+                <div class="tool-card" onclick="window.location.href='/ai-tools/mindmap/'">
+                    <div class="tool-icon">🧠</div>
+                    <h3>Mind Map</h3>
+                    <p>Visual brainstorming and idea organization</p>
+                </div>
+                <div class="tool-card" onclick="window.location.href='/task-manager/'">
+                    <div class="tool-icon">✅</div>
+                    <h3>Task Manager</h3>
+                    <p>Comprehensive task tracking and management</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pomodoro Timer Modal -->
+<div id="pomodoroModal" class="modal-back" style="display: none;">
+    <div class="modal">
+        <div class="modal-head">
+            <h3>🍅 Pomodoro Timer</h3>
+            <button class="x" onclick="closePomodoroTimer()">✕</button>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+            <div class="timer-display">
+                <div id="timerTime">25:00</div>
+                <div id="timerPhase">Work Session</div>
+            </div>
+            <div class="timer-controls">
+                <button id="startBtn" class="btn btn-primary" onclick="startTimer()">Start</button>
+                <button id="pauseBtn" class="btn btn-secondary" onclick="pauseTimer()" style="display: none;">Pause</button>
+                <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+            </div>
+            <div class="session-counter">
+                <p>Sessions completed: <span id="sessionCount">0</span>/4</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.tip-category h2 {
+    color: #e7ecf7;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.tips-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.tip-card {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+    transform: translateY(-5px);
+    border-color: #5b8cff;
+    box-shadow: 0 10px 30px rgba(91,140,255,.2);
+}
+
+.tip-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.tip-card h3 {
+    color: #e7ecf7;
+    margin-bottom: 1rem;
+}
+
+.tip-card p {
+    color: #9fb0d9;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.tip-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.matrix-demo {
+    margin-top: 1rem;
+}
+
+.matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(91,140,255,.3);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.matrix-cell {
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.urgent-important { background: #ef4444; color: white; }
+.important { background: #f59e0b; color: white; }
+.urgent { background: #5b8cff; color: white; }
+.neither { background: #6b7280; color: white; }
+
+.sound-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.sound-btn {
+    background: rgba(91,140,255,.2);
+    border: 1px solid rgba(91,140,255,.3);
+    color: #e7ecf7;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sound-btn:hover {
+    background: rgba(91,140,255,.3);
+    border-color: #5b8cff;
+}
+
+.hydration-tracker {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(91,140,255,.1);
+    border-radius: 8px;
+}
+
+.productivity-tools {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.productivity-tools h2 {
+    color: #e7ecf7;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.tool-card {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    border-color: #5b8cff;
+    box-shadow: 0 8px 25px rgba(91,140,255,.3);
+}
+
+.tool-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.tool-card h3 {
+    color: #e7ecf7;
+    margin-bottom: 0.5rem;
+}
+
+.tool-card p {
+    color: #9fb0d9;
+    font-size: 0.9rem;
+}
+
+.timer-display {
+    margin: 2rem 0;
+}
+
+#timerTime {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #5b8cff;
+    margin-bottom: 0.5rem;
+}
+
+#timerPhase {
+    color: #9fb0d9;
+    font-size: 1.2rem;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.session-counter {
+    color: #9fb0d9;
+    margin-top: 1rem;
+}
+
+.modal-back {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal {
+    background: #0b1222;
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(91,140,255,.3);
+}
+
+.modal-head h3 {
+    color: #e7ecf7;
+    margin: 0;
+}
+
+.modal-head .x {
+    background: none;
+    border: none;
+    color: #9fb0d9;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.modal-head .x:hover {
+    background: rgba(91,140,255,.1);
+    color: #5b8cff;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,.06);
+    color: #5b8cff;
+    border: 1px solid rgba(91,140,255,.3);
+}
+
+.btn-secondary:hover {
+    background: rgba(91,140,255,.1);
+    border-color: #5b8cff;
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+let pomodoroTimer = null;
+let timeLeft = 25 * 60; // 25 minutes in seconds
+let isWorkSession = true;
+let sessionCount = 0;
+let waterCount = parseInt(localStorage.getItem('waterCount') || '0');
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('waterCount').textContent = waterCount;
+});
+
+function startPomodoro() {
+    document.getElementById('pomodoroModal').style.display = 'flex';
+}
+
+function closePomodoroTimer() {
+    document.getElementById('pomodoroModal').style.display = 'none';
+    if (pomodoroTimer) {
+        clearInterval(pomodoroTimer);
+        pomodoroTimer = null;
+    }
+}
+
+function startTimer() {
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'inline-flex';
+    
+    pomodoroTimer = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        
+        if (timeLeft <= 0) {
+            clearInterval(pomodoroTimer);
+            completeSession();
+        }
+    }, 1000);
+}
+
+function pauseTimer() {
+    clearInterval(pomodoroTimer);
+    pomodoroTimer = null;
+    document.getElementById('startBtn').style.display = 'inline-flex';
+    document.getElementById('pauseBtn').style.display = 'none';
+}
+
+function resetTimer() {
+    clearInterval(pomodoroTimer);
+    pomodoroTimer = null;
+    timeLeft = isWorkSession ? 25 * 60 : 5 * 60;
+    updateTimerDisplay();
+    document.getElementById('startBtn').style.display = 'inline-flex';
+    document.getElementById('pauseBtn').style.display = 'none';
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    document.getElementById('timerTime').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function completeSession() {
+    if (isWorkSession) {
+        sessionCount++;
+        document.getElementById('sessionCount').textContent = sessionCount;
+        
+        if (sessionCount % 4 === 0) {
+            // Long break after 4 sessions
+            timeLeft = 30 * 60;
+            document.getElementById('timerPhase').textContent = 'Long Break';
+        } else {
+            // Short break
+            timeLeft = 5 * 60;
+            document.getElementById('timerPhase').textContent = 'Short Break';
+        }
+        isWorkSession = false;
+    } else {
+        // Back to work
+        timeLeft = 25 * 60;
+        document.getElementById('timerPhase').textContent = 'Work Session';
+        isWorkSession = true;
+    }
+    
+    updateTimerDisplay();
+    document.getElementById('startBtn').style.display = 'inline-flex';
+    document.getElementById('pauseBtn').style.display = 'none';
+    
+    // Play notification sound (if available)
+    showNotification(isWorkSession ? 'Break time! Take a rest.' : 'Time to work! Stay focused.', 'success');
+}
+
+function createTimeBlock() {
+    const task = prompt('What task would you like to time block?');
+    const duration = prompt('How many minutes?');
+    
+    if (task && duration) {
+        showNotification(`Time block created: ${task} for ${duration} minutes`, 'success');
+    }
+}
+
+function enableFocusMode() {
+    showNotification('Focus mode enabled! Minimize distractions.', 'success');
+    // In a real app, this could block websites, turn off notifications, etc.
+}
+
+function playSound(type) {
+    const sounds = {
+        rain: 'Playing rain sounds...',
+        forest: 'Playing forest sounds...',
+        cafe: 'Playing café ambiance...'
+    };
+    showNotification(sounds[type], 'info');
+}
+
+function startBreathingExercise() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); display: flex; align-items: center;
+        justify-content: center; z-index: 2000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="text-align: center; color: white;">
+            <h2>🧘 Breathing Exercise</h2>
+            <div id="breathingCircle" style="width: 200px; height: 200px; border: 3px solid #5b8cff; border-radius: 50%; margin: 2rem auto; transition: transform 4s ease-in-out;"></div>
+            <p id="breathingText" style="font-size: 1.5rem; margin-bottom: 2rem;">Breathe in...</p>
+            <button onclick="this.closest('div').remove()" style="background: #5b8cff; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">Close</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    let isInhaling = true;
+    const circle = modal.querySelector('#breathingCircle');
+    const text = modal.querySelector('#breathingText');
+    
+    setInterval(() => {
+        if (isInhaling) {
+            circle.style.transform = 'scale(1.5)';
+            text.textContent = 'Breathe in...';
+        } else {
+            circle.style.transform = 'scale(1)';
+            text.textContent = 'Breathe out...';
+        }
+        isInhaling = !isInhaling;
+    }, 4000);
+}
+
+function addWater() {
+    waterCount++;
+    localStorage.setItem('waterCount', waterCount.toString());
+    document.getElementById('waterCount').textContent = waterCount;
+    
+    if (waterCount >= 8) {
+        showNotification('Great job! You\'ve reached your daily water goal! 💧', 'success');
+    } else {
+        showNotification('Water logged! Keep staying hydrated! 💧', 'success');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 3000;
+        padding: 12px 20px; border-radius: 8px; color: white;
+        background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#5b8cff'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+</script>
+{% endblock %}

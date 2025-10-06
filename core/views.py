@@ -161,3 +161,12 @@ def mindmap(request):
 
 def task_tree(request):
     return render(request, 'core/task_tree.html')
+
+def todo_dashboard(request):
+    return render(request, 'core/todo_dashboard.html')
+
+def task_manager(request):
+    return render(request, 'core/task_manager.html')
+
+def productivity_tips(request):
+    return render(request, 'core/productivity_tips.html')

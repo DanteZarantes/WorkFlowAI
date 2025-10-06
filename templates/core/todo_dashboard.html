@@ -1,0 +1,336 @@
+{% extends 'base_new.html' %}
+
+{% block title %}To Do Dashboard - WorkFlowAI{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h1 class="section-title">📋 To Do Dashboard</h1>
+            <p class="section-subtitle">Manage all your tasks and projects in one place</p>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3 id="completedTasks">0</h3>
+                    <p>Completed Today</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <h3 id="pendingTasks">0</h3>
+                    <p>Pending Tasks</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-info">
+                    <h3 id="activeProjects">0</h3>
+                    <p>Active Projects</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-info">
+                    <h3 id="productivity">85%</h3>
+                    <p>Productivity</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-section">
+                <h2>🚀 Quick Actions</h2>
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="window.location.href='/project-boards/'">
+                        <i class="fas fa-plus"></i> New Project
+                    </button>
+                    <button class="action-btn" onclick="createQuickTask()">
+                        <i class="fas fa-tasks"></i> Quick Task
+                    </button>
+                    <button class="action-btn" onclick="window.location.href='/ai-tools/mindmap/'">
+                        <i class="fas fa-brain"></i> Mind Map
+                    </button>
+                    <button class="action-btn" onclick="window.location.href='/ai-tools/task-tree/'">
+                        <i class="fas fa-sitemap"></i> Task Tree
+                    </button>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>📅 Today's Tasks</h2>
+                <div id="todayTasks" class="task-list">
+                    <div class="empty-state">
+                        <p>No tasks for today. Create your first task!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>📊 Recent Projects</h2>
+                <div id="recentProjects" class="project-list">
+                    <div class="empty-state">
+                        <p>No projects yet. Start your first project!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-section">
+                <h2>🎯 Goals & Milestones</h2>
+                <div class="goals-list">
+                    <div class="goal-item">
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%;"></div>
+                            </div>
+                            <span>75%</span>
+                        </div>
+                        <h4>Complete Q4 Projects</h4>
+                        <p>3 of 4 projects completed</p>
+                    </div>
+                    <div class="goal-item">
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%;"></div>
+                            </div>
+                            <span>60%</span>
+                        </div>
+                        <h4>Team Productivity</h4>
+                        <p>Increase efficiency by 20%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: #5b8cff;
+    box-shadow: 0 10px 30px rgba(91,140,255,.2);
+}
+
+.stat-icon {
+    font-size: 2rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(91,140,255,.1);
+    border-radius: 12px;
+}
+
+.stat-info h3 {
+    color: #e7ecf7;
+    font-size: 2rem;
+    margin: 0;
+}
+
+.stat-info p {
+    color: #9fb0d9;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.dashboard-section {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.dashboard-section h2 {
+    color: #e7ecf7;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.action-btn {
+    background: linear-gradient(135deg, #5b8cff, #764ba2);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(91,140,255,.4);
+}
+
+.task-list, .project-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.empty-state {
+    text-align: center;
+    color: #9fb0d9;
+    padding: 2rem;
+}
+
+.goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.goal-item {
+    padding: 1rem;
+    background: rgba(91,140,255,.05);
+    border-radius: 8px;
+    border: 1px solid rgba(91,140,255,.2);
+}
+
+.goal-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(107,114,128,.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.goal-item h4 {
+    color: #e7ecf7;
+    margin: 0 0 0.25rem 0;
+}
+
+.goal-item p {
+    color: #9fb0d9;
+    margin: 0;
+    font-size: 0.9rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+});
+
+function loadDashboardData() {
+    const boards = JSON.parse(localStorage.getItem('user_boards') || '[]');
+    
+    // Update stats
+    document.getElementById('activeProjects').textContent = boards.length;
+    document.getElementById('completedTasks').textContent = Math.floor(Math.random() * 15) + 5;
+    document.getElementById('pendingTasks').textContent = Math.floor(Math.random() * 25) + 10;
+    
+    // Load recent projects
+    const recentProjectsContainer = document.getElementById('recentProjects');
+    if (boards.length > 0) {
+        recentProjectsContainer.innerHTML = boards.slice(-3).map(board => `
+            <div class="project-item" style="padding: 1rem; border-bottom: 1px solid rgba(91,140,255,.2); cursor: pointer;" onclick="openBoard('${board.id}')">
+                <h4 style="color: #e7ecf7; margin: 0 0 0.5rem 0;">${board.name}</h4>
+                <p style="color: #9fb0d9; margin: 0; font-size: 0.9rem;">${board.description}</p>
+                <div style="margin-top: 0.5rem;">
+                    <span style="background: rgba(91,140,255,.2); color: #5b8cff; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">${board.type}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function createQuickTask() {
+    const taskName = prompt('Enter task name:');
+    if (taskName) {
+        const task = {
+            id: Date.now().toString(),
+            name: taskName,
+            created: new Date().toISOString(),
+            status: 'pending'
+        };
+        
+        const tasks = JSON.parse(localStorage.getItem('quick_tasks') || '[]');
+        tasks.push(task);
+        localStorage.setItem('quick_tasks', JSON.stringify(tasks));
+        
+        showNotification('Quick task created!', 'success');
+        loadDashboardData();
+    }
+}
+
+function openBoard(boardId) {
+    const boards = JSON.parse(localStorage.getItem('user_boards') || '[]');
+    const board = boards.find(b => b.id === boardId);
+    if (board) {
+        sessionStorage.setItem('current_board', JSON.stringify(board));
+        const urls = {
+            mindmap: '/ai-tools/mindmap/',
+            tree: '/ai-tools/task-tree/',
+            kanban: '/ai-tools/kanban/',
+            dashboard: '/ai-tools/dashboard/'
+        };
+        window.location.href = urls[board.type] || urls.mindmap;
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 3000;
+        padding: 12px 20px; border-radius: 8px; color: white;
+        background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#5b8cff'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
+</script>
+{% endblock %}

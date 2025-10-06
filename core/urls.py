@@ -52,6 +52,11 @@ urlpatterns = [
     
     # Project Management
     path('project-boards/', views.project_boards, name='project_boards'), # AI Project Boards
+    
+    # To Do Management
+    path('todo-dashboard/', views.todo_dashboard, name='todo_dashboard'), # To Do Dashboard
+    path('task-manager/', views.task_manager, name='task_manager'), # Task Manager
+    path('productivity-tips/', views.productivity_tips, name='productivity_tips'), # Productivity Tips
 
     path('ai-tools/mindmap/', views.mindmap, name='mindmap'),    # Mind Map Tool
     path('ai-tools/task-tree/', views.task_tree, name='task_tree'), # Task Tree Tool

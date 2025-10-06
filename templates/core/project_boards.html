@@ -459,14 +459,47 @@ window.createBoard = function() {
         description: desc,
         type: type,
         created: new Date().toISOString(),
-        tasks: 0
+        tasks: 0,
+        progress: 0,
+        status: 'active',
+        dueDate: null,
+        priority: 'medium',
+        tags: [],
+        teamMembers: [],
+        lastModified: new Date().toISOString()
     };
     
     boards.push(board);
     localStorage.setItem('user_boards', JSON.stringify(boards));
+    
+    // Initialize board-specific task storage
+    localStorage.setItem(`board_tasks_${board.id}`, JSON.stringify([]));
+    
     hideModal();
     renderBoards();
+    
+    // Show success message
+    showNotification(`Board "${name}" created successfully!`, 'success');
 };
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 3000;
+        padding: 12px 20px; border-radius: 8px; color: white;
+        background: ${type === 'success' ? '#22c55e' : type === 'error' ? '#ef4444' : '#5b8cff'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    const style = document.createElement('style');
+    style.textContent = '@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }';
+    document.head.appendChild(style);
+    
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 3000);
+}
 
 window.toggleView = function() {
     currentView = currentView === 'boards' ? 'progress' : 'boards';
