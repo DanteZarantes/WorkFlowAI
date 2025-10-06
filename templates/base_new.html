@@ -843,6 +843,18 @@
                     <a href="#" class="nav-link">Tools <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
                     <div class="dropdown-content">
                         <a href="{% url 'project_boards' %}"><i class="fas fa-project-diagram"></i> Project Boards</a>
+                        <a href="{% url 'mindmap' %}"><i class="fas fa-brain"></i> Mind Map</a>
+                        <a href="{% url 'task_tree' %}"><i class="fas fa-sitemap"></i> Task Tree</a>
+                        <a href="{% url 'kanban' %}"><i class="fas fa-columns"></i> Kanban Board</a>
+                    </div>
+                </div>
+                
+                <div class="dropdown">
+                    <a href="#" class="nav-link">To Do <i class="fas fa-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'todo_dashboard' %}"><i class="fas fa-tachometer-alt"></i> To Do Dashboard</a>
+                        <a href="{% url 'task_manager' %}"><i class="fas fa-tasks"></i> Task Manager</a>
+                        <a href="{% url 'productivity_tips' %}"><i class="fas fa-lightbulb"></i> Productivity Tips</a>
                     </div>
                 </div>
                 
@@ -922,6 +934,16 @@
             <div class="sidebar-section">
                 <div class="sidebar-title">Project Management</div>
                 <a href="{% url 'project_boards' %}" class="sidebar-link"><i class="fas fa-project-diagram"></i>Project Boards</a>
+                <a href="{% url 'mindmap' %}" class="sidebar-link"><i class="fas fa-brain"></i>Mind Map</a>
+                <a href="{% url 'task_tree' %}" class="sidebar-link"><i class="fas fa-sitemap"></i>Task Tree</a>
+                <a href="{% url 'kanban' %}" class="sidebar-link"><i class="fas fa-columns"></i>Kanban Board</a>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">To Do Management</div>
+                <a href="{% url 'todo_dashboard' %}" class="sidebar-link"><i class="fas fa-tachometer-alt"></i>To Do Dashboard</a>
+                <a href="{% url 'task_manager' %}" class="sidebar-link"><i class="fas fa-tasks"></i>Task Manager</a>
+                <a href="{% url 'productivity_tips' %}" class="sidebar-link"><i class="fas fa-lightbulb"></i>Productivity Tips</a>
             </div>
             
             <div class="sidebar-section">
