@@ -1262,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('font-weight', 'bold')
             .text(d => d.data.task_number || '1');
         
-        // Task title
+        // Task title (clipped to card bounds)
         nodeGroups.append('text')
             .attr('class', 'task-title')
             .attr('x', -cardWidth/2 + 15)
@@ -1272,11 +1272,11 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('font-weight', 'bold')
             .text(d => {
                 const title = d.data.title || 'Untitled Task';
-                return title.length > 25 ? title.substring(0, 25) + '...' : title;
+                return title.length > 22 ? title.substring(0, 22) + '...' : title;
             })
             .on('dblclick', (event, d) => openEditor(d.data.id));
         
-        // Task description
+        // Task description (clipped to card bounds)
         nodeGroups.append('text')
             .attr('class', 'task-desc')
             .attr('x', -cardWidth/2 + 15)
@@ -1285,17 +1285,21 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('font-size', '11px')
             .text(d => {
                 if (!d.data.description) return 'No description';
-                const maxLength = 30;
-                return d.data.description.length > maxLength ? d.data.description.substring(0, 30) + '...' : d.data.description;
+                const maxLength = 25;
+                return d.data.description.length > maxLength ? d.data.description.substring(0, 25) + '...' : d.data.description;
             });
         
         // Responsibility
         nodeGroups.append('text')
             .attr('x', -cardWidth/2 + 15)
-            .attr('y', -cardWidth/2 + 85)
+            .attr('y', -cardHeight/2 + 85)
             .attr('fill', '#6b7280')
             .attr('font-size', '9px')
-            .text(d => d.data.responsibility ? `👤 ${d.data.responsibility}` : '');
+            .text(d => {
+                if (!d.data.responsibility) return '';
+                const resp = d.data.responsibility.length > 15 ? d.data.responsibility.substring(0, 15) + '...' : d.data.responsibility;
+                return `👤 ${resp}`;
+            });
         
         // Date range
         nodeGroups.append('text')
@@ -1318,9 +1322,15 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('fill', '#6b7280')
             .attr('font-size', '9px')
             .text(d => {
-                const email = d.data.email ? `📧 ${d.data.email.substring(0, 15)}...` : '';
-                const phone = d.data.phone ? `📱 ${d.data.phone}` : '';
-                return email || phone || '';
+                if (d.data.email) {
+                    const email = d.data.email.length > 12 ? d.data.email.substring(0, 12) + '...' : d.data.email;
+                    return `📧 ${email}`;
+                }
+                if (d.data.phone) {
+                    const phone = d.data.phone.length > 12 ? d.data.phone.substring(0, 12) + '...' : d.data.phone;
+                    return `📱 ${phone}`;
+                }
+                return '';
             });
         
         // Action buttons inside card

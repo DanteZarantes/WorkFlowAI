@@ -865,6 +865,8 @@ document.addEventListener('DOMContentLoaded', function() {
             rect.setAttribute('stroke-width', '2');
             g.appendChild(rect);
             
+
+            
             // Status badge
             const statusBadge = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             statusBadge.setAttribute('x', '-130');
@@ -933,25 +935,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             title.setAttribute('class', 'node-title');
-            title.setAttribute('y', '-25');
-            title.setAttribute('x', '-125');
-            title.setAttribute('text-anchor', 'start');
+            title.setAttribute('y', '-10');
+            title.setAttribute('x', '0');
+            title.setAttribute('text-anchor', 'middle');
             title.setAttribute('fill', '#1f2937');
             title.setAttribute('font-size', '14px');
             title.setAttribute('font-weight', 'bold');
             const titleText = node.title || 'Untitled Topic';
-            title.textContent = titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText;
+            title.textContent = titleText.length > 20 ? titleText.substring(0, 20) + '...' : titleText;
             g.appendChild(title);
             
             const desc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             desc.setAttribute('class', 'node-desc');
-            desc.setAttribute('y', '-5');
-            desc.setAttribute('x', '-125');
-            desc.setAttribute('text-anchor', 'start');
+            desc.setAttribute('y', '10');
+            desc.setAttribute('x', '0');
+            desc.setAttribute('text-anchor', 'middle');
             desc.setAttribute('fill', '#4b5563');
             desc.setAttribute('font-size', '11px');
             const descText = node.desc || 'No description';
-            desc.textContent = descText.length > 30 ? descText.substring(0, 30) + '...' : descText;
+            desc.textContent = descText.length > 25 ? descText.substring(0, 25) + '...' : descText;
             g.appendChild(desc);
             
             // Responsibility
@@ -960,7 +962,10 @@ document.addEventListener('DOMContentLoaded', function() {
             responsibility.setAttribute('y', '15');
             responsibility.setAttribute('fill', '#6b7280');
             responsibility.setAttribute('font-size', '9px');
-            responsibility.textContent = node.responsibility ? `👤 ${node.responsibility}` : '';
+            if (node.responsibility) {
+                const resp = node.responsibility.length > 15 ? node.responsibility.substring(0, 15) + '...' : node.responsibility;
+                responsibility.textContent = `👤 ${resp}`;
+            }
             g.appendChild(responsibility);
             
             // Date range
@@ -979,14 +984,18 @@ document.addEventListener('DOMContentLoaded', function() {
             g.appendChild(dateRange);
             
             // Contact info
-            const contact = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            const contact = document.createElementNS('http://www.w3.svg', 'text');
             contact.setAttribute('x', '-125');
             contact.setAttribute('y', '50');
             contact.setAttribute('fill', '#6b7280');
             contact.setAttribute('font-size', '9px');
-            const email = node.email ? `📧 ${node.email.substring(0, 15)}...` : '';
-            const phone = node.phone ? `📱 ${node.phone}` : '';
-            contact.textContent = email || phone || '';
+            if (node.email) {
+                const email = node.email.length > 12 ? node.email.substring(0, 12) + '...' : node.email;
+                contact.textContent = `📧 ${email}`;
+            } else if (node.phone) {
+                const phone = node.phone.length > 12 ? node.phone.substring(0, 12) + '...' : node.phone;
+                contact.textContent = `📱 ${phone}`;
+            }
             g.appendChild(contact);
             
             const actions = document.createElementNS('http://www.w3.org/2000/svg', 'g');
