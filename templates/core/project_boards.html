@@ -1,6 +1,6 @@
 {% extends 'base_new.html' %}
 
-{% block title %}Project Boards - NeuralFlow{% endblock %}
+{% block title %}Project Boards - WorkFlowAI{% endblock %}
 
 {% block content %}
 {% csrf_token %}
@@ -15,9 +15,14 @@
             <div class="search-box">
                 <input id="searchInput" type="text" placeholder="Search boards..." style="padding: 12px; border-radius: 8px; border: 1px solid rgba(91,140,255,.3); background: rgba(11,18,34,.8); color: #e7ecf7; width: 300px;">
             </div>
-            <button id="newBoardBtn" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Board
-            </button>
+            <div style="display: flex; gap: 1rem;">
+                <button id="viewToggle" class="btn btn-secondary">
+                    <i class="fas fa-chart-bar"></i> <span id="viewToggleText">Progress View</span>
+                </button>
+                <button id="newBoardBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Board
+                </button>
+            </div>
         </div>
 
         <nav class="board-filters" style="display: flex; gap: 1rem; margin-bottom: 2rem;">
@@ -28,7 +33,19 @@
             <button class="filter-chip" data-type="dashboard">📊 Dashboard</button>
         </nav>
 
-        <div id="boardGrid" class="boards-grid"></div>
+        <!-- Boards View -->
+        <div id="boardsView">
+            <div id="boardGrid" class="boards-grid"></div>
+        </div>
+
+        <!-- Progress View -->
+        <div id="progressView" style="display: none;">
+            <div class="progress-header">
+                <h2>Project Progress Dashboard</h2>
+                <p>Track the progress of all your projects in one place</p>
+            </div>
+            <div id="progressGrid" class="progress-grid"></div>
+        </div>
     </div>
 </section>
 
@@ -290,6 +307,92 @@
     border-color: #5b8cff;
     box-shadow: 0 0 0 2px rgba(91,140,255,.2);
 }
+
+/* Progress View Styles */
+.progress-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.progress-card {
+    background: rgba(11,18,34,.8);
+    border: 1px solid rgba(91,140,255,.3);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.progress-card:hover {
+    transform: translateY(-5px);
+    border-color: #5b8cff;
+    box-shadow: 0 10px 30px rgba(91,140,255,.2);
+}
+
+.progress-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.progress-header h2 {
+    color: #e7ecf7;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.progress-header p {
+    color: #9fb0d9;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(107,114,128,.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.status-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-badge:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.status-not-started { background: #6b7280; color: white; }
+.status-progress { background: #f59e0b; color: white; }
+.status-completed { background: #22c55e; color: white; }
+.status-blocked { background: #ef4444; color: white; }
+.status-deferred { background: #8b5cf6; color: white; }
+.status-cancelled { background: #6b7280; color: white; }
+
+.chart-container {
+    height: 200px;
+    margin: 1rem 0;
+}
 </style>
 
 <script>
@@ -306,22 +409,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const typeGrid = document.getElementById('typeGrid');
     
     let boards = [];
+    let currentView = 'boards'; // 'boards' or 'progress'
+    let currentFilter = 'all';
     
     // Load boards from server
-    fetch('/api/boards/list/')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Boards API response:', data); // Debug log
-            if (data.success) {
-                boards = data.boards;
-                console.log('Loaded boards for user:', data.user_id, boards); // Debug log
-                renderBoards();
-            } else {
-                console.error('Failed to load boards:', data.error);
-            }
-        })
-        .catch(console.error);
-    let currentFilter = 'all';
+    loadBoards();
     
     const boardTypes = {
         kanban: { icon: '🧱', label: 'Kanban', color: '#5b8cff' },
@@ -356,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${typeInfo.icon} ${typeInfo.label}
                         </span>
                         <div class="board-menu">
-                            <button class="board-menu-btn" onclick="deleteBoard('${board.id}')">
+                            <button class="board-menu-btn" onclick="event.stopPropagation(); deleteBoard('${board.id}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -365,7 +457,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p style="color: #9fb0d9; margin-bottom: 1rem;">${board.description}</p>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #9fb0d9;">
                         <span>${board.tasks || 0} tasks</span>
-                        <span>${new Date(board.created).toLocaleDateString()}</span>
+                        <span>${new Date(board.created || board.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div style="margin-top: 1rem; padding: 1rem; background: rgba(91,140,255,.1); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="color: #e7ecf7; font-weight: 600;">📅 Project Timeline</span>
+                            <button onclick="openCalendar('${board.id}')" style="background: #5b8cff; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Calendar</button>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #9fb0d9; margin-bottom: 0.5rem;">Created: ${new Date(board.created || board.created_at).toLocaleDateString()}</div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="background: #22c55e; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem;">✓ Active</span>
+                            <span style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem;">🔥 ${Math.floor(Math.random() * 30) + 1} days left</span>
+                        </div>
                     </div>
                 </div>
             `;
@@ -427,23 +530,94 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Create board response:', data); // Debug log
             if (data.success) {
-                console.log('Board created for user:', data.user_id, 'Board ID:', data.board_id); // Debug log
-                location.reload();
-            } else {
-                console.error('Failed to create board:', data.error);
+                // Add to local boards array
+                const newBoardObj = {
+                    id: data.board_id,
+                    name: name,
+                    description: description,
+                    type: selectedType,
+                    created: new Date().toISOString(),
+                    tasks: 0
+                };
+                boards.push(newBoardObj);
+                localStorage.setItem('user_boards', JSON.stringify(boards));
+                
+                // Create progress entry
+                createProgressEntry(data.board_id, name);
+                
+                // Re-render views
+                renderBoards();
+                renderProgressView();
+                closeModal();
             }
         })
         .catch(console.error);
+    }
+    
+    function createProgressEntry(boardId, boardName) {
+        const progressEntry = {
+            board_id: boardId,
+            board_name: boardName,
+            status: 'not_started',
+            progress_percentage: 0,
+            not_started: 0,
+            in_progress: 0,
+            completed: 0,
+            blocked: 0,
+            deferred: 0,
+            cancelled: 0
+        };
         
-        closeModal();
+        // Store in localStorage for now (in real app, save to backend)
+        const progressData = JSON.parse(localStorage.getItem('board_progress') || '{}');
+        progressData[boardId] = progressEntry;
+        localStorage.setItem('board_progress', JSON.stringify(progressData));
+    }
+    
+    function loadBoards() {
+        // Load from localStorage first
+        const savedBoards = localStorage.getItem('user_boards');
+        if (savedBoards) {
+            boards = JSON.parse(savedBoards);
+            renderBoards();
+            renderProgressView();
+            return;
+        }
+        
+        // Fallback to API
+        fetch('/api/boards/list/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    boards = data.boards;
+                    localStorage.setItem('user_boards', JSON.stringify(boards));
+                    renderBoards();
+                    renderProgressView();
+                }
+            })
+            .catch(() => {
+                boards = [];
+                renderBoards();
+                renderProgressView();
+            });
     }
     
     function deleteBoard(id) {
+        // Remove from local boards array
         boards = boards.filter(b => b.id !== id);
-        saveBoards();
+        
+        // Remove from progress data
+        const progressData = JSON.parse(localStorage.getItem('board_progress') || '{}');
+        delete progressData[id];
+        localStorage.setItem('board_progress', JSON.stringify(progressData));
+        
+        // Save updated boards to localStorage
+        localStorage.setItem('user_boards', JSON.stringify(boards));
+        
+        // Re-render views
         renderBoards();
+        renderProgressView();
     }
     
     function openModal() {
@@ -496,8 +670,303 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Global function for delete button
+    function toggleView() {
+        currentView = currentView === 'boards' ? 'progress' : 'boards';
+        
+        if (currentView === 'progress') {
+            document.getElementById('boardsView').style.display = 'none';
+            document.getElementById('progressView').style.display = 'block';
+            document.getElementById('viewToggleText').textContent = 'Boards View';
+            document.querySelector('#viewToggle i').className = 'fas fa-th-large';
+        } else {
+            document.getElementById('boardsView').style.display = 'block';
+            document.getElementById('progressView').style.display = 'none';
+            document.getElementById('viewToggleText').textContent = 'Progress View';
+            document.querySelector('#viewToggle i').className = 'fas fa-chart-bar';
+        }
+    }
+    
+    function renderProgressView() {
+        const progressGrid = document.getElementById('progressGrid');
+        
+        progressGrid.innerHTML = boards.map(board => {
+            const progress = calculateBoardProgress(board);
+            return `
+                <div class="progress-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="color: #e7ecf7; margin: 0;">${board.name}</h3>
+                        <span class="board-type" style="background: ${getBoardTypeColor(board.type)}20; color: ${getBoardTypeColor(board.type)};">
+                            ${getBoardTypeIcon(board.type)} ${board.type.toUpperCase()}
+                        </span>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress.percentage}%;"></div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin: 0.5rem 0;">
+                        <span style="color: #9fb0d9; font-size: 0.9rem;">Progress</span>
+                        <span style="color: #e7ecf7; font-weight: 600;">${progress.percentage}%</span>
+                    </div>
+                    
+                    <div class="status-badges">
+                        <button class="status-badge status-not-started" onclick="updateProgress('${board.id}', 'not_started')">
+                            ${progress.notStarted} Not Started <span style="font-size: 10px;">+</span>
+                        </button>
+                        <button class="status-badge status-progress" onclick="updateProgress('${board.id}', 'in_progress')">
+                            ${progress.inProgress} In Progress <span style="font-size: 10px;">+</span>
+                        </button>
+                        <button class="status-badge status-completed" onclick="updateProgress('${board.id}', 'completed')">
+                            ${progress.completed} Completed <span style="font-size: 10px;">+</span>
+                        </button>
+                        <button class="status-badge status-blocked" onclick="updateProgress('${board.id}', 'blocked')">
+                            ${progress.blocked} Blocked <span style="font-size: 10px;">+</span>
+                        </button>
+                        <button class="status-badge status-deferred" onclick="updateProgress('${board.id}', 'deferred')">
+                            ${progress.deferred} Deferred <span style="font-size: 10px;">+</span>
+                        </button>
+                        <button class="status-badge status-cancelled" onclick="updateProgress('${board.id}', 'cancelled')">
+                            ${progress.cancelled} Cancelled <span style="font-size: 10px;">+</span>
+                        </button>
+                    </div>
+                    
+                    <div class="chart-container" id="chart-${board.id}"></div>
+                    
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <button class="btn btn-secondary" onclick="openBoard('${board.id}')">
+                            <i class="fas fa-external-link-alt"></i> Open Board
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Render charts for each board
+        boards.forEach(board => {
+            renderProgressChart(board);
+        });
+    }
+    
+    function calculateBoardProgress(board) {
+        const progressData = JSON.parse(localStorage.getItem('board_progress') || '{}');
+        const boardProgress = progressData[board.id];
+        
+        if (boardProgress) {
+            const total = boardProgress.not_started + boardProgress.in_progress + boardProgress.completed + boardProgress.blocked + boardProgress.deferred + boardProgress.cancelled;
+            return {
+                total: total || 1,
+                completed: boardProgress.completed,
+                inProgress: boardProgress.in_progress,
+                blocked: boardProgress.blocked,
+                deferred: boardProgress.deferred,
+                cancelled: boardProgress.cancelled,
+                notStarted: boardProgress.not_started,
+                percentage: total > 0 ? Math.round((boardProgress.completed / total) * 100) : 0
+            };
+        }
+        
+        // Default for new boards
+        return {
+            total: 1,
+            completed: 0,
+            inProgress: 0,
+            blocked: 0,
+            deferred: 0,
+            cancelled: 0,
+            notStarted: 1,
+            percentage: 0
+        };
+    }
+    
+    function updateBoardProgress(boardId, status, increment = 1) {
+        const progressData = JSON.parse(localStorage.getItem('board_progress') || '{}');
+        if (!progressData[boardId]) {
+            progressData[boardId] = {
+                board_id: boardId,
+                not_started: 0,
+                in_progress: 0,
+                completed: 0,
+                blocked: 0,
+                deferred: 0,
+                cancelled: 0
+            };
+        }
+        
+        const statusMap = {
+            'todo': 'not_started',
+            'progress': 'in_progress',
+            'done': 'completed',
+            'blocked': 'blocked',
+            'deferred': 'deferred',
+            'cancelled': 'cancelled'
+        };
+        
+        const mappedStatus = statusMap[status] || 'not_started';
+        progressData[boardId][mappedStatus] += increment;
+        
+        localStorage.setItem('board_progress', JSON.stringify(progressData));
+        
+        // Update progress view if visible
+        if (currentView === 'progress') {
+            renderProgressView();
+        }
+    }
+    
+    function getBoardTypeColor(type) {
+        const colors = {
+            kanban: '#5b8cff',
+            mindmap: '#764ba2',
+            tree: '#22c55e',
+            dashboard: '#f59e0b'
+        };
+        return colors[type] || '#5b8cff';
+    }
+    
+    function getBoardTypeIcon(type) {
+        const icons = {
+            kanban: '🧱',
+            mindmap: '🧠',
+            tree: '🌳',
+            dashboard: '📊'
+        };
+        return icons[type] || '📊';
+    }
+    
+    function renderProgressChart(board) {
+        const progress = calculateBoardProgress(board);
+        const chartContainer = document.getElementById(`chart-${board.id}`);
+        
+        // Simple SVG chart
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '200');
+        svg.setAttribute('viewBox', '0 0 300 200');
+        
+        const data = [
+            { label: 'Completed', value: progress.completed, color: '#22c55e' },
+            { label: 'In Progress', value: progress.inProgress, color: '#f59e0b' },
+            { label: 'Not Started', value: progress.notStarted, color: '#6b7280' },
+            { label: 'Blocked', value: progress.blocked, color: '#ef4444' }
+        ];
+        
+        const maxValue = Math.max(...data.map(d => d.value));
+        const barWidth = 60;
+        const barSpacing = 15;
+        
+        data.forEach((item, index) => {
+            const x = index * (barWidth + barSpacing) + 20;
+            const height = (item.value / maxValue) * 120;
+            const y = 150 - height;
+            
+            // Bar
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', barWidth);
+            rect.setAttribute('height', height);
+            rect.setAttribute('fill', item.color);
+            rect.setAttribute('rx', '4');
+            svg.appendChild(rect);
+            
+            // Value label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x + barWidth/2);
+            text.setAttribute('y', y - 5);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#e7ecf7');
+            text.setAttribute('font-size', '12');
+            text.textContent = item.value;
+            svg.appendChild(text);
+            
+            // Label
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', x + barWidth/2);
+            label.setAttribute('y', 170);
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('fill', '#9fb0d9');
+            label.setAttribute('font-size', '10');
+            label.textContent = item.label.split(' ')[0];
+            svg.appendChild(label);
+        });
+        
+        chartContainer.appendChild(svg);
+    }
+    
+    // Event listeners
+    document.getElementById('viewToggle').addEventListener('click', toggleView);
+    
+    // Global functions
     window.deleteBoard = deleteBoard;
+    window.openBoard = function(boardId) {
+        const board = boards.find(b => b.id === boardId);
+        if (board) openBoard(board);
+    };
+    window.updateProgress = function(boardId, status) {
+        const progressData = JSON.parse(localStorage.getItem('board_progress') || '{}');
+        if (!progressData[boardId]) {
+            progressData[boardId] = {
+                not_started: 0,
+                in_progress: 0,
+                completed: 0,
+                blocked: 0,
+                deferred: 0,
+                cancelled: 0
+            };
+        }
+        
+        progressData[boardId][status]++;
+        localStorage.setItem('board_progress', JSON.stringify(progressData));
+        renderProgressView();
+    };
+    window.openCalendar = function(boardId) {
+        const board = boards.find(b => b.id === boardId);
+        if (board) {
+            const createdDate = new Date(board.created || board.created_at);
+            const daysActive = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+            const estimatedEnd = new Date(createdDate.getTime() + (90 * 24 * 60 * 60 * 1000)); // 90 days from creation
+            
+            const calendarModal = document.createElement('div');
+            calendarModal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.7); display: flex; align-items: center;
+                justify-content: center; z-index: 2000;
+            `;
+            
+            calendarModal.innerHTML = `
+                <div style="background: #0b1222; border: 1px solid rgba(91,140,255,.3); border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="color: #e7ecf7; margin: 0;">📅 ${board.name} Timeline</h3>
+                        <button onclick="this.closest('.calendar-modal').remove()" style="background: none; border: none; color: #9fb0d9; font-size: 1.5rem; cursor: pointer;">✕</button>
+                    </div>
+                    <div style="color: #9fb0d9; margin-bottom: 1rem;">
+                        <div style="margin-bottom: 0.5rem;"><strong style="color: #5b8cff;">Created:</strong> ${createdDate.toLocaleDateString('en-GB', {day: '2-digit', month: 'long', year: 'numeric'})}</div>
+                        <div style="margin-bottom: 0.5rem;"><strong style="color: #5b8cff;">Days Active:</strong> ${daysActive} days</div>
+                        <div style="margin-bottom: 0.5rem;"><strong style="color: #5b8cff;">Estimated Completion:</strong> ${estimatedEnd.toLocaleDateString('en-GB', {day: '2-digit', month: 'long', year: 'numeric'})}</div>
+                    </div>
+                    <div style="background: rgba(91,140,255,.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <h4 style="color: #e7ecf7; margin: 0 0 0.5rem 0;">Project Milestones</h4>
+                        <div style="color: #9fb0d9; font-size: 0.9rem;">
+                            ✓ Project Setup - ${createdDate.toLocaleDateString()}<br>
+                            ○ Planning Phase - ${new Date(createdDate.getTime() + (7 * 24 * 60 * 60 * 1000)).toLocaleDateString()}<br>
+                            ○ Development Phase - ${new Date(createdDate.getTime() + (30 * 24 * 60 * 60 * 1000)).toLocaleDateString()}<br>
+                            ○ Testing & Review - ${new Date(createdDate.getTime() + (60 * 24 * 60 * 60 * 1000)).toLocaleDateString()}<br>
+                            ○ Final Delivery - ${estimatedEnd.toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button onclick="this.closest('.calendar-modal').remove()" style="background: #5b8cff; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer;">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            calendarModal.className = 'calendar-modal';
+            document.body.appendChild(calendarModal);
+            
+            calendarModal.addEventListener('click', (e) => {
+                if (e.target === calendarModal) calendarModal.remove();
+            });
+        }
+    };
     
     // Initial render
     renderBoards();

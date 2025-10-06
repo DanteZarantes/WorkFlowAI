@@ -1,4 +1,4 @@
-# NeuralFlow - AI-Powered Business Solutions Platform
+# WorkFlowAI - AI-Powered Business Solutions Platform
 
 A Django-based web application that provides AI-powered business solutions with user management, task organization, and JSON-based data storage.
 
@@ -42,7 +42,7 @@ A Django-based web application that provides AI-powered business solutions with 
 ## 📁 Project Structure
 
 ```
-NeuralFlow1.0/
+WorkFlowAI/
 ├── config/               # Django configuration
 │   ├── settings/         # Environment-specific settings
 │   ├── urls.py           # URL routing
@@ -74,51 +74,122 @@ NeuralFlow1.0/
 ## 🔧 Installation & Setup
 
 ### Prerequisites
-- Python 3.9+ installed
-- Git installed
-- Virtual environment tool (venv)
+- **Python 3.9+** - Download from [python.org](https://python.org)
+- **Git** - Download from [git-scm.com](https://git-scm.com)
+- **Node.js 16+** (optional, for frontend development)
+- **Virtual environment tool** (venv or virtualenv)
 
-### Setup Steps
+### Quick Setup (5 minutes)
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd NeuralFlow1.0
+# 1. Clone the repository
+git clone https://github.com/your-username/WorkFlowAI.git
+cd WorkFlowAI
 
-# Create virtual environment
+# 2. Create and activate virtual environment
 python -m venv venv
-venv\Scripts\activate  # On Windows
-# source venv/bin/activate  # On macOS/Linux
 
-# Install dependencies
+# Windows:
+venv\Scripts\activate
+
+# macOS/Linux:
+source venv/bin/activate
+
+# 3. Install Python dependencies
 pip install -r requirements.txt
 
-# Setup database
+# 4. Setup database and create admin user
 python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 
-# Initialize JSON data system
+# 5. Initialize data system with sample data
 python manage.py setup_data --sync-users
 
-# Start development server
+# 6. Start the development server
 python manage.py runserver
 ```
 
-## 🌐 Usage
+### 🚀 Access Your Application
+After setup, open your browser and navigate to:
+- **Main App**: http://localhost:8000
+- **Admin Panel**: http://localhost:8000/admin
+- **Project Boards**: http://localhost:8000/boards
+- **API Documentation**: http://localhost:8000/api/docs
 
-### Application URLs
-- **Main Application**: `http://localhost:8000`
-- **Admin Panel**: `http://localhost:8000/admin`
-- **User Registration**: `http://localhost:8000/accounts/signup/`
-- **User Login**: `http://localhost:8000/accounts/login/`
-- **Dashboard**: `http://localhost:8000/dashboard/`
+### 🔧 Advanced Setup Options
 
-### Key Features
-- **User Registration**: Create new accounts with automatic JSON data storage
-- **Task Management**: Create and organize tasks via API endpoints
-- **Project Management**: Manage projects with team collaboration
-- **Dashboard**: View statistics and recent activities
-- **Profile Management**: Update user profiles and preferences
+#### Environment Configuration
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env file with your settings
+# SECRET_KEY=your-secret-key-here
+# DEBUG=True
+# ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+#### Frontend Development (Optional)
+```bash
+# Install Node.js dependencies
+cd frontend
+npm install
+
+# Start frontend development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+#### Docker Setup (Alternative)
+```bash
+# Build and run with Docker
+docker-compose up --build
+
+# Access at http://localhost:8000
+```
+
+## 🌐 Usage Guide
+
+### 📱 Core Features
+
+#### **Project Boards** - Visual Task Management
+- **Kanban Boards**: Drag-and-drop task organization
+- **Task Tree**: Hierarchical task breakdown (1, 1.1, 1.1.1, etc.)
+- **Mind Maps**: Visual project planning with D3.js
+- **Real-time Sync**: Collaborative workspace updates
+
+#### **Task Management** - Smart Organization
+- **Hierarchical Numbering**: Auto-generated task numbers (1.1.2, 2.3.1)
+- **Subtask Creation**: Unlimited nesting levels
+- **Priority System**: Critical, High, Medium, Low priorities
+- **Status Tracking**: Todo, In Progress, Review, Done
+- **Due Date Management**: Calendar integration with overdue alerts
+
+#### **Advanced Visualizations** - D3.js Powered
+- **Interactive Task Trees**: Collapsible hierarchical views
+- **Dynamic Mind Maps**: Drag-and-drop node positioning
+- **Real-time Updates**: Live collaboration features
+- **Multiple Layouts**: Tree, Cluster, and Radial views
+
+### 🎯 Quick Start Workflow
+
+1. **Create Account** → Register at `/accounts/signup/`
+2. **Create Board** → Go to Project Boards
+3. **Add Tasks** → Use Task Tree or Mind Map
+4. **Organize** → Drag, drop, and nest tasks
+5. **Collaborate** → Share boards with team members
+6. **Track Progress** → Monitor via Dashboard analytics
+
+### 🔗 Application URLs
+- **🏠 Home**: `http://localhost:8000`
+- **📊 Dashboard**: `http://localhost:8000/dashboard/`
+- **📋 Project Boards**: `http://localhost:8000/boards/`
+- **🌳 Task Tree**: `http://localhost:8000/task-tree/`
+- **🧠 Mind Map**: `http://localhost:8000/mindmap/`
+- **⚙️ Admin Panel**: `http://localhost:8000/admin/`
+- **📚 API Docs**: `http://localhost:8000/api/docs/`
 
 ## 🔒 Security Features
 
@@ -165,34 +236,108 @@ python manage.py runserver
 
 ## 🔧 Management Commands
 
+### Data Management
 ```bash
-# Initialize data system
+# Initialize complete data system
 python manage.py setup_data
 
-# Sync existing users to JSON
+# Sync existing users to JSON storage
 python manage.py setup_data --sync-users
+
+# Validate all data integrity
+python manage.py setup_data --validate
+
+# Create comprehensive backup
+python manage.py setup_data --backup
+
+# Display storage statistics
+python manage.py setup_data --stats
+
+# Clean orphaned data
+python manage.py setup_data --cleanup
+```
+
+### Board Management
+```bash
+# Initialize board system
+python manage.py init_boards
+
+# Fix board isolation issues
+python manage.py fix_board_isolation
+
+# Sync enhanced models
+python manage.py sync_enhanced_models
+
+# Fix user data consistency
+python manage.py fix_user_data
+```
+
+### Development Utilities
+```bash
+# Create sample data for testing
+python manage.py create_sample_data
+
+# Reset database (development only)
+python manage.py flush
+
+# Collect static files
+python manage.py collectstatic
+
+# Create superuser
+python manage.py createsuperuser
+```
+
+## 🧪 Testing & Quality Assurance
+
+### Unit Tests
+```bash
+# Run all tests
+python manage.py test
+
+# Run specific test modules
+python manage.py test accounts
+python manage.py test core
+
+# Run with coverage
+pip install coverage
+coverage run --source='.' manage.py test
+coverage report
+coverage html  # Generate HTML report
+```
+
+### Storage System Tests
+```bash
+# Test JSON storage system
+python test_json_storage.py
+
+# Test board isolation
+python test_board_isolation.py
 
 # Validate data integrity
 python manage.py setup_data --validate
-
-# Create data backup
-python manage.py setup_data --backup
-
-# Show storage statistics
-python manage.py setup_data --stats
 ```
 
-## 🧪 Testing
-
+### System Health Checks
 ```bash
-# Run comprehensive JSON storage tests
-python test_json_storage.py
-
-# Run Django tests
-python manage.py test
-
-# Check system configuration
+# Django system check
 python manage.py check
+
+# Check deployment readiness
+python manage.py check --deploy
+
+# Database consistency
+python manage.py dbshell
+```
+
+### Performance Testing
+```bash
+# Load testing with locust
+pip install locust
+locust -f tests/load_test.py
+
+# Memory profiling
+pip install memory-profiler
+python -m memory_profiler manage.py runserver
 ```
 
 ## 📚 Documentation
@@ -202,20 +347,65 @@ Detailed documentation is available in the `docs/` folder:
 - `DATA_SYSTEM.md` - JSON storage system documentation
 - `IMPLEMENTATION_SUMMARY.md` - Technical implementation details
 
-## 🔧 Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 Copy `.env.example` to `.env` and configure:
 ```env
-SECRET_KEY=your-secret-key-here
+# Security
+SECRET_KEY=your-super-secret-key-here-change-in-production
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
+ALLOWED_HOSTS=localhost,127.0.0.1,your-domain.com
+
+# Database (Optional - defaults to SQLite)
+DATABASE_URL=postgresql://user:password@localhost:5432/workflowai
+
+# Email Configuration
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+
+# Storage
+STATIC_ROOT=/var/www/workflowai/static/
+MEDIA_ROOT=/var/www/workflowai/media/
+
+# Security Headers
+SECURE_SSL_REDIRECT=False
+SESSION_COOKIE_SECURE=False
+CSRF_COOKIE_SECURE=False
 ```
 
-### Custom Settings
-- `config/settings/development.py` - Local development
-- `config/settings/production.py` - Production deployment
-- `config/settings/base.py` - Shared settings
+### Settings Structure
+```
+config/settings/
+├── base.py          # Shared settings
+├── development.py   # Local development
+├── production.py    # Production deployment
+└── testing.py       # Test environment
+```
+
+### Custom Configuration
+```python
+# config/settings/local.py (create for personal settings)
+from .development import *
+
+# Override any settings
+DEBUG = True
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+
+# Custom database
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'workflowai_dev',
+        'USER': 'your_user',
+        'PASSWORD': 'your_password',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
+```
 
 ---
 

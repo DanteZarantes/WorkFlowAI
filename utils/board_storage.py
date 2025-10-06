@@ -98,14 +98,19 @@ class BoardStorage(SecureJSONStorage):
             # Find parent task and generate child number
             parent_task = self._find_task_by_id(existing_data[board_id]['tasks'], parent_id)
             if parent_task:
-                parent_number = parent_task['task_number']
+                parent_number = parent_task.get('task_number', '1')
+                # Count existing children of this parent
                 child_count = len([t for t in existing_data[board_id]['tasks'] 
                                  if t.get('parent_id') == parent_id])
                 task_data['task_number'] = f"{parent_number}.{child_count + 1}"
             else:
-                task_data['task_number'] = str(len(existing_data[board_id]['tasks']) + 1)
+                # Parent not found, make it a root task
+                root_count = len([t for t in existing_data[board_id]['tasks'] 
+                                if not t.get('parent_id')])
+                task_data['task_number'] = str(root_count + 1)
+                task_data['parent_id'] = None  # Clear invalid parent_id
         else:
-            # Root task
+            # Root task - count existing root tasks
             root_count = len([t for t in existing_data[board_id]['tasks'] 
                             if not t.get('parent_id')])
             task_data['task_number'] = str(root_count + 1)
@@ -250,7 +255,7 @@ class BoardStorage(SecureJSONStorage):
         return self._write_secure_file(file_path, data)
     
     def delete_board_task(self, user_id: int, board_id: str, task_id: str) -> bool:
-        """Delete task from board"""
+        """Delete task and all its children from board"""
         # Validate user_id and board ownership
         if not user_id or user_id <= 0:
             return False
@@ -266,16 +271,48 @@ class BoardStorage(SecureJSONStorage):
         if board_id not in data:
             return False
         
+        # Find all tasks to delete (task and its children)
+        tasks_to_delete = set([task_id])
+        self._find_child_tasks(data[board_id]['tasks'], task_id, tasks_to_delete)
+        
         original_count = len(data[board_id]['tasks'])
-        # Only delete tasks that belong to the current user
+        # Delete tasks and their children
         data[board_id]['tasks'] = [t for t in data[board_id]['tasks'] 
-                                  if not (t.get('id') == task_id and t.get('owner_id') == user_id)]
+                                  if not (t.get('id') in tasks_to_delete and t.get('owner_id') == user_id)]
         
         if len(data[board_id]['tasks']) < original_count:
+            # Renumber remaining tasks to maintain hierarchy
+            self._renumber_tasks(data[board_id]['tasks'])
             data[board_id]['updated_at'] = datetime.now().isoformat()
             return self._write_secure_file(file_path, data)
         
         return False
+    
+    def _find_child_tasks(self, tasks: List[Dict[str, Any]], parent_id: str, tasks_to_delete: set):
+        """Recursively find all child tasks"""
+        for task in tasks:
+            if task.get('parent_id') == parent_id:
+                tasks_to_delete.add(task['id'])
+                self._find_child_tasks(tasks, task['id'], tasks_to_delete)
+    
+    def _renumber_tasks(self, tasks: List[Dict[str, Any]]):
+        """Renumber tasks to maintain proper hierarchy"""
+        # Find root tasks and renumber them
+        root_tasks = [t for t in tasks if not t.get('parent_id')]
+        root_tasks.sort(key=lambda x: x.get('created_at', ''))
+        
+        for i, task in enumerate(root_tasks, 1):
+            task['task_number'] = str(i)
+            self._renumber_children(tasks, task['id'], task['task_number'])
+    
+    def _renumber_children(self, tasks: List[Dict[str, Any]], parent_id: str, parent_number: str):
+        """Recursively renumber child tasks"""
+        child_tasks = [t for t in tasks if t.get('parent_id') == parent_id]
+        child_tasks.sort(key=lambda x: x.get('created_at', ''))
+        
+        for i, task in enumerate(child_tasks, 1):
+            task['task_number'] = f"{parent_number}.{i}"
+            self._renumber_children(tasks, task['id'], task['task_number'])
 
 # Global instance
 board_storage = BoardStorage()

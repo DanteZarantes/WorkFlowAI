@@ -1,6 +1,6 @@
 {% extends 'base_new.html' %}
 
-{% block title %}Mind Map - NeuralFlow{% endblock %}
+{% block title %}Mind Map - WorkFlowAI{% endblock %}
 
 {% block content %}
 <section class="section" style="padding: 0; height: 100vh; overflow: hidden;">
@@ -54,6 +54,30 @@
             <label class="field">
                 <span>Description</span>
                 <textarea id="editorDesc" rows="3" placeholder="Detailed description..."></textarea>
+            </label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <label class="field">
+                    <span>Start Date</span>
+                    <input id="editorStartDate" type="date">
+                </label>
+                <label class="field">
+                    <span>End Date</span>
+                    <input id="editorEndDate" type="date">
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <label class="field">
+                    <span>Email</span>
+                    <input id="editorEmail" type="email" placeholder="contact@example.com">
+                </label>
+                <label class="field">
+                    <span>Phone</span>
+                    <input id="editorPhone" type="tel" placeholder="+1 234 567 8900">
+                </label>
+            </div>
+            <label class="field">
+                <span>Responsibility</span>
+                <input id="editorResponsibility" type="text" placeholder="Person responsible for this task">
             </label>
             <label class="field">
                 <span>Priority</span>
@@ -600,7 +624,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let viewBox = { x: 0, y: 0, width: 0, height: 0 };
     let scale = 1;
     
-    const STORAGE_KEY = `neuralflow_mindmap_${currentBoard.id || 'default'}`;
+    const STORAGE_KEY = `workflowai_mindmap_${currentBoard.id || 'default'}`;
     let mindmapData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"nodes": [], "links": []}');
     
     function saveData() {
@@ -618,6 +642,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function addNode(parentId = null) {
+        // Generate hierarchical numbering
+        let nodeNumber = '1';
+        if (parentId) {
+            const parentNode = mindmapData.nodes.find(n => n.id === parentId);
+            if (parentNode) {
+                const parentNumber = parentNode.node_number || '1';
+                const siblingCount = mindmapData.links.filter(l => l.source === parentId).length;
+                nodeNumber = `${parentNumber}.${siblingCount + 1}`;
+            }
+        } else {
+            const rootCount = mindmapData.nodes.filter(n => 
+                !mindmapData.links.some(l => l.target === n.id)
+            ).length;
+            nodeNumber = String(rootCount + 1);
+        }
+        
         const newNode = {
             id: generateId(),
             title: '',
@@ -625,6 +665,7 @@ document.addEventListener('DOMContentLoaded', function() {
             priority: 'medium',
             status: 'planning',
             due: '',
+            node_number: nodeNumber,
             x: stage.clientWidth / 2 + (Math.random() - 0.5) * 200,
             y: stage.clientHeight / 2 + (Math.random() - 0.5) * 200
         };
@@ -660,8 +701,40 @@ document.addEventListener('DOMContentLoaded', function() {
         mindmapData.nodes = mindmapData.nodes.filter(n => !toDelete.has(n.id));
         mindmapData.links = mindmapData.links.filter(l => !toDelete.has(l.source) && !toDelete.has(l.target));
         
+        // Renumber remaining nodes
+        renumberNodes();
+        
         saveData();
         render();
+    }
+    
+    function renumberNodes() {
+        // Reset all numbers
+        mindmapData.nodes.forEach(node => {
+            delete node.node_number;
+        });
+        
+        // Number root nodes first
+        const rootNodes = mindmapData.nodes.filter(n => 
+            !mindmapData.links.some(l => l.target === n.id)
+        );
+        
+        rootNodes.forEach((node, index) => {
+            node.node_number = String(index + 1);
+            numberChildren(node.id, node.node_number);
+        });
+    }
+    
+    function numberChildren(parentId, parentNumber) {
+        const children = mindmapData.links
+            .filter(l => l.source === parentId)
+            .map(l => mindmapData.nodes.find(n => n.id === l.target))
+            .filter(n => n);
+        
+        children.forEach((child, index) => {
+            child.node_number = `${parentNumber}.${index + 1}`;
+            numberChildren(child.id, child.node_number);
+        });
     }
     
     function updateNode(nodeId, data) {
@@ -680,6 +753,11 @@ document.addEventListener('DOMContentLoaded', function() {
         editingNodeId = nodeId;
         editorTitle.value = node.title || '';
         editorDesc.value = node.desc || '';
+        document.getElementById('editorStartDate').value = node.start_date || '';
+        document.getElementById('editorEndDate').value = node.end_date || '';
+        document.getElementById('editorEmail').value = node.email || '';
+        document.getElementById('editorPhone').value = node.phone || '';
+        document.getElementById('editorResponsibility').value = node.responsibility || '';
         editorPriority.value = node.priority || 'medium';
         editorStatus.value = node.status || 'planning';
         
@@ -697,10 +775,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const title = editorTitle.value.trim() || 'Untitled Topic';
         const desc = editorDesc.value.trim();
+        const startDate = document.getElementById('editorStartDate').value;
+        const endDate = document.getElementById('editorEndDate').value;
+        const email = document.getElementById('editorEmail').value.trim();
+        const phone = document.getElementById('editorPhone').value.trim();
+        const responsibility = document.getElementById('editorResponsibility').value.trim();
         const priority = editorPriority.value;
         const status = editorStatus.value;
         
-        updateNode(editingNodeId, { title, desc, priority, status });
+        updateNode(editingNodeId, { title, desc, start_date: startDate, end_date: endDate, email, phone, responsibility, priority, status });
         closeEditor();
     }
     
@@ -750,13 +833,79 @@ document.addEventListener('DOMContentLoaded', function() {
             g.setAttribute('transform', `translate(${node.x},${node.y})`);
             g.setAttribute('data-id', node.id);
             
+            // Card shadow
+            const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            shadow.setAttribute('width', '280');
+            shadow.setAttribute('height', '140');
+            shadow.setAttribute('x', '-137');
+            shadow.setAttribute('y', '-67');
+            shadow.setAttribute('rx', '16');
+            shadow.setAttribute('fill', 'rgba(0,0,0,0.2)');
+            shadow.setAttribute('opacity', '0.3');
+            g.appendChild(shadow);
+            
+            // Main card
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('class', `node-card status-${node.status} priority-${node.priority}`);
-            rect.setAttribute('width', '240');
-            rect.setAttribute('height', '120');
-            rect.setAttribute('x', '-120');
-            rect.setAttribute('y', '-60');
+            rect.setAttribute('width', '280');
+            rect.setAttribute('height', '140');
+            rect.setAttribute('x', '-140');
+            rect.setAttribute('y', '-70');
+            rect.setAttribute('rx', '16');
+            const gradients = {
+                todo: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)',
+                planning: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+                progress: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                review: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
+                done: 'linear-gradient(135deg, #d1fae5, #a7f3d0)'
+            };
+            rect.setAttribute('fill', gradients[node.status] || gradients.planning);
+            const priorityColors = { low: '#22c55e', medium: '#f59e0b', high: '#ef4444', critical: '#dc2626' };
+            rect.setAttribute('stroke', priorityColors[node.priority] || '#6b7280');
+            rect.setAttribute('stroke-width', '2');
             g.appendChild(rect);
+            
+            // Status badge
+            const statusBadge = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            statusBadge.setAttribute('x', '-130');
+            statusBadge.setAttribute('y', '-60');
+            statusBadge.setAttribute('width', '80');
+            statusBadge.setAttribute('height', '20');
+            statusBadge.setAttribute('rx', '10');
+            const statusColors = { todo: '#6b7280', planning: '#5b8cff', progress: '#f59e0b', review: '#5b8cff', done: '#22c55e' };
+            statusBadge.setAttribute('fill', statusColors[node.status] || '#6b7280');
+            g.appendChild(statusBadge);
+            
+            const statusText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            statusText.setAttribute('x', '-90');
+            statusText.setAttribute('y', '-48');
+            statusText.setAttribute('text-anchor', 'middle');
+            statusText.setAttribute('fill', 'white');
+            statusText.setAttribute('font-size', '10px');
+            statusText.setAttribute('font-weight', 'bold');
+            const statusLabels = { todo: 'TO DO', planning: 'PLAN', progress: 'DOING', review: 'REVIEW', done: 'DONE' };
+            statusText.textContent = statusLabels[node.status] || 'PLAN';
+            g.appendChild(statusText);
+            
+            // Node number badge
+            const numberCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            numberCircle.setAttribute('cx', '115');
+            numberCircle.setAttribute('cy', '-45');
+            numberCircle.setAttribute('r', '15');
+            numberCircle.setAttribute('fill', '#5b8cff');
+            numberCircle.setAttribute('stroke', '#4f46e5');
+            numberCircle.setAttribute('stroke-width', '2');
+            g.appendChild(numberCircle);
+            
+            const nodeNumber = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            nodeNumber.setAttribute('x', '115');
+            nodeNumber.setAttribute('y', '-40');
+            nodeNumber.setAttribute('text-anchor', 'middle');
+            nodeNumber.setAttribute('fill', 'white');
+            nodeNumber.setAttribute('font-size', '10px');
+            nodeNumber.setAttribute('font-weight', 'bold');
+            nodeNumber.textContent = node.node_number || '1';
+            g.appendChild(nodeNumber);
             
             // Priority emoji in bottom right corner
             const priorityEmoji = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -784,90 +933,146 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             title.setAttribute('class', 'node-title');
-            title.setAttribute('y', '-30');
-            title.setAttribute('x', '0');
-            title.setAttribute('text-anchor', 'middle');
-            title.textContent = node.title || 'Untitled Topic';
+            title.setAttribute('y', '-25');
+            title.setAttribute('x', '-125');
+            title.setAttribute('text-anchor', 'start');
+            title.setAttribute('fill', '#1f2937');
+            title.setAttribute('font-size', '14px');
+            title.setAttribute('font-weight', 'bold');
+            const titleText = node.title || 'Untitled Topic';
+            title.textContent = titleText.length > 25 ? titleText.substring(0, 25) + '...' : titleText;
             g.appendChild(title);
             
             const desc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             desc.setAttribute('class', 'node-desc');
             desc.setAttribute('y', '-5');
-            desc.setAttribute('x', '-110');
+            desc.setAttribute('x', '-125');
             desc.setAttribute('text-anchor', 'start');
-            desc.textContent = node.desc ? (node.desc.length > 35 ? node.desc.substring(0, 35) + '...' : node.desc) : '';
+            desc.setAttribute('fill', '#4b5563');
+            desc.setAttribute('font-size', '11px');
+            const descText = node.desc || 'No description';
+            desc.textContent = descText.length > 30 ? descText.substring(0, 30) + '...' : descText;
             g.appendChild(desc);
             
-            // Due date
-            const dueDate = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            const today = new Date().toISOString().split('T')[0];
-            const isOverdue = node.due && node.due < today;
-            dueDate.setAttribute('class', isOverdue ? 'node-due overdue' : 'node-due');
-            dueDate.setAttribute('y', '20');
-            dueDate.setAttribute('x', '-110');
-            dueDate.setAttribute('text-anchor', 'start');
-            if (node.due) {
-                dueDate.textContent = isOverdue ? `⚠️ Overdue: ${node.due}` : `📅 Due: ${node.due}`;
+            // Responsibility
+            const responsibility = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            responsibility.setAttribute('x', '-125');
+            responsibility.setAttribute('y', '15');
+            responsibility.setAttribute('fill', '#6b7280');
+            responsibility.setAttribute('font-size', '9px');
+            responsibility.textContent = node.responsibility ? `👤 ${node.responsibility}` : '';
+            g.appendChild(responsibility);
+            
+            // Date range
+            const dateRange = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            dateRange.setAttribute('x', '-125');
+            dateRange.setAttribute('y', '35');
+            dateRange.setAttribute('fill', '#6b7280');
+            dateRange.setAttribute('font-size', '9px');
+            const start = node.start_date ? new Date(node.start_date).toLocaleDateString() : '';
+            const end = node.end_date ? new Date(node.end_date).toLocaleDateString() : '';
+            if (start && end) {
+                dateRange.textContent = `📅 ${start} → ${end}`;
+            } else if (end) {
+                dateRange.textContent = `📅 Due: ${end}`;
             }
-            g.appendChild(dueDate);
+            g.appendChild(dateRange);
+            
+            // Contact info
+            const contact = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            contact.setAttribute('x', '-125');
+            contact.setAttribute('y', '50');
+            contact.setAttribute('fill', '#6b7280');
+            contact.setAttribute('font-size', '9px');
+            const email = node.email ? `📧 ${node.email.substring(0, 15)}...` : '';
+            const phone = node.phone ? `📱 ${node.phone}` : '';
+            contact.textContent = email || phone || '';
+            g.appendChild(contact);
             
             const actions = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             actions.setAttribute('class', 'node-actions');
             
-            // Add button - positioned inside card top right
-            const addBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            addBtn.setAttribute('transform', 'translate(90, -40)');
+            // Action buttons inside card
+            const actionGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            actionGroup.setAttribute('transform', 'translate(115, -25)');
+            
+            // Add button
+            const addBtn = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            addBtn.setAttribute('x', '-8');
+            addBtn.setAttribute('y', '-8');
+            addBtn.setAttribute('width', '16');
+            addBtn.setAttribute('height', '16');
+            addBtn.setAttribute('rx', '4');
+            addBtn.setAttribute('fill', '#22c55e');
             addBtn.style.cursor = 'pointer';
-            const addCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            addCircle.setAttribute('class', 'action-btn');
-            addCircle.setAttribute('r', '12');
-            const addText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            addText.setAttribute('class', 'action-icon');
-            addText.textContent = '+';
-            addBtn.appendChild(addCircle);
-            addBtn.appendChild(addText);
             addBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 addNode(node.id);
             });
+            actionGroup.appendChild(addBtn);
             
-            // Edit button - positioned inside card middle right
-            const editBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            editBtn.setAttribute('transform', 'translate(90, -10)');
+            const addText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            addText.setAttribute('x', '0');
+            addText.setAttribute('y', '2');
+            addText.setAttribute('text-anchor', 'middle');
+            addText.setAttribute('fill', 'white');
+            addText.setAttribute('font-size', '10px');
+            addText.setAttribute('font-weight', 'bold');
+            addText.style.pointerEvents = 'none';
+            addText.textContent = '+';
+            actionGroup.appendChild(addText);
+            
+            // Edit button
+            const editBtn = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            editBtn.setAttribute('x', '-8');
+            editBtn.setAttribute('y', '12');
+            editBtn.setAttribute('width', '16');
+            editBtn.setAttribute('height', '16');
+            editBtn.setAttribute('rx', '4');
+            editBtn.setAttribute('fill', '#5b8cff');
             editBtn.style.cursor = 'pointer';
-            const editCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            editCircle.setAttribute('class', 'action-btn');
-            editCircle.setAttribute('r', '12');
-            const editText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            editText.setAttribute('class', 'action-icon');
-            editText.textContent = '✎';
-            editBtn.appendChild(editCircle);
-            editBtn.appendChild(editText);
             editBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 openEditor(node.id);
             });
+            actionGroup.appendChild(editBtn);
             
-            // Delete button - positioned inside card bottom right (above emoji)
-            const delBtn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            delBtn.setAttribute('transform', 'translate(90, 20)');
+            const editText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            editText.setAttribute('x', '0');
+            editText.setAttribute('y', '22');
+            editText.setAttribute('text-anchor', 'middle');
+            editText.setAttribute('fill', 'white');
+            editText.setAttribute('font-size', '8px');
+            editText.style.pointerEvents = 'none';
+            editText.textContent = '✎';
+            actionGroup.appendChild(editText);
+            
+            // Delete button
+            const delBtn = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            delBtn.setAttribute('x', '-8');
+            delBtn.setAttribute('y', '32');
+            delBtn.setAttribute('width', '16');
+            delBtn.setAttribute('height', '16');
+            delBtn.setAttribute('rx', '4');
+            delBtn.setAttribute('fill', '#ef4444');
             delBtn.style.cursor = 'pointer';
-            const delCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            delCircle.setAttribute('class', 'action-btn');
-            delCircle.setAttribute('r', '12');
-            const delText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            delText.setAttribute('class', 'action-icon');
-            delText.textContent = '🗑';
-            delBtn.appendChild(delCircle);
-            delBtn.appendChild(delText);
             delBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 deleteNode(node.id);
             });
+            actionGroup.appendChild(delBtn);
             
-            actions.appendChild(addBtn);
-            actions.appendChild(editBtn);
-            actions.appendChild(delBtn);
+            const delText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            delText.setAttribute('x', '0');
+            delText.setAttribute('y', '42');
+            delText.setAttribute('text-anchor', 'middle');
+            delText.setAttribute('fill', 'white');
+            delText.setAttribute('font-size', '8px');
+            delText.style.pointerEvents = 'none';
+            delText.textContent = '×';
+            actionGroup.appendChild(delText);
+            
+            actions.appendChild(actionGroup);
             g.appendChild(actions);
             
             // Drag handlers - only on card background, not action buttons
