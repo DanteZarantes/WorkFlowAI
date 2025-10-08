@@ -83,7 +83,7 @@ WorkFlowAI/
 ```bash
 # 1. Clone the repository
 git clone https://github.com/your-username/WorkFlowAI.git
-cd WorkFlowAI
+cd NeuralFlow1.3broken
 
 # 2. Create and activate virtual environment
 python -m venv venv
@@ -102,10 +102,7 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 
-# 5. Initialize data system with sample data
-python manage.py setup_data --sync-users
-
-# 6. Start the development server
+# 5. Start the development server
 python manage.py runserver
 ```
 

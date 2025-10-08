@@ -12,7 +12,12 @@ Use this file to run Django commands like:
 """
 import os
 import sys
+from pathlib import Path
 
+# Add project root to Python path
+BASE_DIR = Path(__file__).resolve().parent
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
 
 def main():
     """

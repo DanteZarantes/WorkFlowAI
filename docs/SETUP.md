@@ -12,7 +12,7 @@
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd neuralflow
+cd NeuralFlow1.3broken
 
 # Create and activate virtual environment
 python -m venv venv
@@ -21,8 +21,11 @@ venv\Scripts\activate
 # On macOS/Linux:
 source venv/bin/activate
 
-# Install dependencies
+# Install dependencies (basic setup)
 pip install -r requirements.txt
+
+# OR for full features (optional):
+# pip install -r requirements-full.txt
 
 # Set up environment variables
 copy .env.example .env
